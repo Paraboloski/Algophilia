@@ -68,6 +68,8 @@ class ItemArmor(Base):
     item_id: Mapped[int] = mapped_column(ForeignKey("item.id", ondelete="CASCADE"), primary_key=True)
 
     bonus_ca: Mapped[int] = mapped_column()
+    
+    penalty: Mapped[str | None] = mapped_column(Text)
 
     item: Mapped["Item"] = relationship(back_populates="armor")
 

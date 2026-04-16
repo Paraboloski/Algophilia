@@ -10,7 +10,11 @@ class SkillType(enum.Enum):
 
 
 class God(enum.Enum):
-    pass
+    HASTUR = "HASTUR"
+    MARDUK = "MARDUK"
+    SULFUR = "SULFUR"
+    NEW_GODS = "NEW GODS"
+    GORGOROTH = "GORGOROTH"
 
 
 class Enhanced(Base):
