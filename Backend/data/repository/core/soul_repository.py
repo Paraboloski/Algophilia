@@ -1,7 +1,10 @@
 from typing import Sequence
+
+from sqlalchemy import select
+
 from .base import BaseRepository
 from Backend.data import Database
-from Backend.models import Soul, Trait
+from Backend.models.core.souls import Soul, Trait
 from Backend.config import Result, ok, err, IOError_
 
 
@@ -16,11 +19,9 @@ class SoulRepository(BaseRepository[Soul]):
     def get_by_trait(cls, trait_id: int) -> Result[Sequence[Soul], IOError_]:
         try:
             with Database.session() as db:
-                entities = (
-                    db.query(Soul)
-                    .filter(Soul.soul_trait_id == trait_id)
-                    .all()
-                )
+                entities = db.scalars(
+                    select(Soul).where(Soul.soul_trait_id == trait_id)
+                ).all()
                 for e in entities:
                     db.expunge(e)
                 return ok(entities)

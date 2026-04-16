@@ -1,10 +1,9 @@
 
 from __future__ import annotations
 
-from sqlalchemy.orm import Session
-from typing import Generic, TypeVar, Type, Sequence
-
+from sqlalchemy import select
 from Backend.data import Database
+from typing import Generic, TypeVar, Type, Sequence
 from Backend.config import Result, ok, err, IOError_, NotFoundError
 
 T = TypeVar("T")
@@ -72,7 +71,7 @@ class BaseRepository(Generic[T]):
     def get_all(cls) -> Result[Sequence[T], IOError_]:
         try:
             with Database.session() as db:
-                entities = db.query(cls.model).all()
+                entities = db.scalars(select(cls.model)).all()
                 for entity in entities:
                     db.expunge(entity)
                 return ok(entities)

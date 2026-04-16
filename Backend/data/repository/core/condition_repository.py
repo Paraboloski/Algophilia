@@ -1,5 +1,5 @@
 from .base import BaseRepository
-from Backend.models import Condition
+from Backend.models.core.conditions import Condition
 
 
 class ConditionRepository(BaseRepository[Condition]):

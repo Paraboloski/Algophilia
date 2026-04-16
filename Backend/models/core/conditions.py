@@ -1,17 +1,15 @@
-from Backend.data import Database
+from Backend.data import Base
+from sqlalchemy import String, Text
 from sqlalchemy.orm import Mapped, mapped_column
-from sqlalchemy import Boolean, Integer, String, Text
 
 
-class Condition(Database.Base):
+class Condition(Base):
     __tablename__ = "condition"
 
-    id: Mapped[int] = mapped_column(
-        Integer, primary_key=True, autoincrement=True)
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
 
     description: Mapped[str | None] = mapped_column(Text)
 
-    label: Mapped[str] = mapped_column(String(100), nullable=False)
+    label: Mapped[str] = mapped_column(String(100))
 
-    is_afflicted: Mapped[bool] = mapped_column(
-        "isAfflicted", Boolean, default=False)
+    is_afflicted: Mapped[bool] = mapped_column("isAfflicted", default=False)

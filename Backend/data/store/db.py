@@ -4,8 +4,13 @@ from typing import Generator
 from Backend.config import get_env
 from sqlalchemy import create_engine
 from contextlib import contextmanager
-from sqlalchemy.orm import declarative_base, sessionmaker, Session
 from Backend.config import ok, err, Result, IOError_
+from sqlalchemy.orm import DeclarativeBase, sessionmaker, Session
+
+
+class Base(DeclarativeBase):
+    pass
+
 
 class Database:
     DB_URL = get_env("DATABASE_URL").unwrap()
@@ -22,8 +27,6 @@ class Database:
         autoflush=False,
         autocommit=False,
     )
-    
-    Base = declarative_base()
 
     @classmethod
     @contextmanager
@@ -31,13 +34,16 @@ class Database:
         db = cls.SessionLocal()
         try:
             yield db
+        except Exception:
+            db.rollback()
+            raise
         finally:
             db.close()
 
     @classmethod
     def init_db(cls) -> Result[None, IOError_]:
         try:
-            cls.Base.metadata.create_all(bind=cls.engine)
+            Base.metadata.create_all(bind=cls.engine)
             return ok(None)
         except Exception as e:
             return err(IOError_(

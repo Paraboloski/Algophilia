@@ -1,8 +1,10 @@
 from typing import Sequence
+from sqlalchemy import select
 from .base import BaseRepository
 from Backend.data import Database
+from sqlalchemy.orm import joinedload
 from Backend.config import Result, ok, err, IOError_, NotFoundError
-from Backend.models import Character, CharacterStat, CharacterCondition, CharacterKnowledge, CharacterSkill
+from Backend.models.core.characters import Character, CharacterStat, CharacterCondition, CharacterKnowledge, CharacterSkill
 
 
 class CharacterRepository(BaseRepository[Character]):
@@ -12,9 +14,8 @@ class CharacterRepository(BaseRepository[Character]):
     def get_full(cls, character_id: int) -> Result[Character, NotFoundError | IOError_]:
         try:
             with Database.session() as db:
-                from sqlalchemy.orm import joinedload
-                entity = (
-                    db.query(Character)
+                entity = db.scalars(
+                    select(Character)
                     .options(
                         joinedload(Character.soul),
                         joinedload(Character.origin),
@@ -24,9 +25,8 @@ class CharacterRepository(BaseRepository[Character]):
                         joinedload(Character.conditions),
                         joinedload(Character.knowledges),
                     )
-                    .filter(Character.id == character_id)
-                    .first()
-                )
+                    .where(Character.id == character_id)
+                ).first()
                 if entity is None:
                     return err(NotFoundError(
                         message="Character not found",
@@ -46,15 +46,7 @@ class CharacterStatRepository(BaseRepository[CharacterStat]):
     model = CharacterStat
 
     @classmethod
-    def get_by_id(cls, entity_id):
-        raise NotImplementedError(
-            "Use get_by_composite_id(character_id, stat_id) instead."
-        )
-
-    @classmethod
-    def get_by_composite_id(
-        cls, character_id: int, stat_id: int,
-    ) -> Result[CharacterStat, NotFoundError | IOError_]:
+    def get_by_composite_id(cls, character_id: int, stat_id: int) -> Result[CharacterStat, NotFoundError | IOError_]:
         try:
             with Database.session() as db:
                 entity = db.get(CharacterStat, (character_id, stat_id))
@@ -73,8 +65,7 @@ class CharacterStatRepository(BaseRepository[CharacterStat]):
             ))
 
     @classmethod
-    def delete_by_composite_id(cls, character_id: int, stat_id: int,
-                               ) -> Result[None, NotFoundError | IOError_]:
+    def delete_by_composite_id(cls, character_id: int, stat_id: int) -> Result[None, NotFoundError | IOError_]:
         try:
             with Database.session() as db:
                 entity = db.get(CharacterStat, (character_id, stat_id))
@@ -97,11 +88,10 @@ class CharacterStatRepository(BaseRepository[CharacterStat]):
     def get_by_character(cls, character_id: int) -> Result[Sequence[CharacterStat], IOError_]:
         try:
             with Database.session() as db:
-                entities = (
-                    db.query(CharacterStat)
-                    .filter(CharacterStat.character_id == character_id)
-                    .all()
-                )
+                entities = db.scalars(
+                    select(CharacterStat)
+                    .where(CharacterStat.character_id == character_id)
+                ).all()
                 for e in entities:
                     db.expunge(e)
                 return ok(entities)
@@ -114,17 +104,9 @@ class CharacterStatRepository(BaseRepository[CharacterStat]):
 
 class CharacterConditionRepository(BaseRepository[CharacterCondition]):
     model = CharacterCondition
-
+    
     @classmethod
-    def get_by_id(cls, entity_id):
-        raise NotImplementedError(
-            "Use get_by_composite_id(character_id, condition_id) instead."
-        )
-
-    @classmethod
-    def get_by_composite_id(
-        cls, character_id: int, condition_id: int,
-    ) -> Result[CharacterCondition, NotFoundError | IOError_]:
+    def get_by_composite_id(cls, character_id: int, condition_id: int) -> Result[CharacterCondition, NotFoundError | IOError_]:
         try:
             with Database.session() as db:
                 entity = db.get(CharacterCondition,
@@ -144,13 +126,10 @@ class CharacterConditionRepository(BaseRepository[CharacterCondition]):
             ))
 
     @classmethod
-    def delete_by_composite_id(
-        cls, character_id: int, condition_id: int,
-    ) -> Result[None, NotFoundError | IOError_]:
+    def delete_by_composite_id(cls, character_id: int, condition_id: int) -> Result[None, NotFoundError | IOError_]:
         try:
             with Database.session() as db:
-                entity = db.get(CharacterCondition,
-                                (character_id, condition_id))
+                entity = db.get(CharacterCondition, (character_id, condition_id))
                 if entity is None:
                     return err(NotFoundError(
                         message="CharacterCondition not found",
@@ -170,11 +149,10 @@ class CharacterConditionRepository(BaseRepository[CharacterCondition]):
     def get_by_character(cls, character_id: int) -> Result[Sequence[CharacterCondition], IOError_]:
         try:
             with Database.session() as db:
-                entities = (
-                    db.query(CharacterCondition)
-                    .filter(CharacterCondition.character_id == character_id)
-                    .all()
-                )
+                entities = db.scalars(
+                    select(CharacterCondition)
+                    .where(CharacterCondition.character_id == character_id)
+                ).all()
                 for e in entities:
                     db.expunge(e)
                 return ok(entities)
@@ -189,15 +167,7 @@ class CharacterKnowledgeRepository(BaseRepository[CharacterKnowledge]):
     model = CharacterKnowledge
 
     @classmethod
-    def get_by_id(cls, entity_id):
-        raise NotImplementedError(
-            "Use get_by_composite_id(character_id, knowledge_id) instead."
-        )
-
-    @classmethod
-    def get_by_composite_id(
-        cls, character_id: int, knowledge_id: int,
-    ) -> Result[CharacterKnowledge, NotFoundError | IOError_]:
+    def get_by_composite_id(cls, character_id: int, knowledge_id: int) -> Result[CharacterKnowledge, NotFoundError | IOError_]:
         try:
             with Database.session() as db:
                 entity = db.get(CharacterKnowledge,
@@ -217,9 +187,7 @@ class CharacterKnowledgeRepository(BaseRepository[CharacterKnowledge]):
             ))
 
     @classmethod
-    def delete_by_composite_id(
-        cls, character_id: int, knowledge_id: int,
-    ) -> Result[None, NotFoundError | IOError_]:
+    def delete_by_composite_id(cls, character_id: int, knowledge_id: int) -> Result[None, NotFoundError | IOError_]:
         try:
             with Database.session() as db:
                 entity = db.get(CharacterKnowledge,
@@ -243,11 +211,10 @@ class CharacterKnowledgeRepository(BaseRepository[CharacterKnowledge]):
     def get_by_character(cls, character_id: int) -> Result[Sequence[CharacterKnowledge], IOError_]:
         try:
             with Database.session() as db:
-                entities = (
-                    db.query(CharacterKnowledge)
-                    .filter(CharacterKnowledge.character_id == character_id)
-                    .all()
-                )
+                entities = db.scalars(
+                    select(CharacterKnowledge)
+                    .where(CharacterKnowledge.character_id == character_id)
+                ).all()
                 for e in entities:
                     db.expunge(e)
                 return ok(entities)
@@ -262,15 +229,7 @@ class CharacterSkillRepository(BaseRepository[CharacterSkill]):
     model = CharacterSkill
 
     @classmethod
-    def get_by_id(cls, entity_id):
-        raise NotImplementedError(
-            "Use get_by_composite_id(character_id, skill_id) instead."
-        )
-
-    @classmethod
-    def get_by_composite_id(
-        cls, character_id: int, skill_id: int,
-    ) -> Result[CharacterSkill, NotFoundError | IOError_]:
+    def get_by_composite_id(cls, character_id: int, skill_id: int) -> Result[CharacterSkill, NotFoundError | IOError_]:
         try:
             with Database.session() as db:
                 entity = db.get(CharacterSkill, (character_id, skill_id))
@@ -289,9 +248,7 @@ class CharacterSkillRepository(BaseRepository[CharacterSkill]):
             ))
 
     @classmethod
-    def delete_by_composite_id(
-        cls, character_id: int, skill_id: int,
-    ) -> Result[None, NotFoundError | IOError_]:
+    def delete_by_composite_id(cls, character_id: int, skill_id: int) -> Result[None, NotFoundError | IOError_]:
         try:
             with Database.session() as db:
                 entity = db.get(CharacterSkill, (character_id, skill_id))
@@ -314,11 +271,10 @@ class CharacterSkillRepository(BaseRepository[CharacterSkill]):
     def get_by_character(cls, character_id: int) -> Result[Sequence[CharacterSkill], IOError_]:
         try:
             with Database.session() as db:
-                entities = (
-                    db.query(CharacterSkill)
-                    .filter(CharacterSkill.character_id == character_id)
-                    .all()
-                )
+                entities = db.scalars(
+                    select(CharacterSkill)
+                    .where(CharacterSkill.character_id == character_id)
+                ).all()
                 for e in entities:
                     db.expunge(e)
                 return ok(entities)

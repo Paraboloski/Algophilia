@@ -1,7 +1,9 @@
 from typing import Sequence
+from sqlalchemy import select
 from .base import BaseRepository
 from Backend.data import Database
-from Backend.models import Origin, OriginKnowledge
+from sqlalchemy.orm import joinedload
+from Backend.models.core.origins import Origin, OriginKnowledge
 from Backend.config import Result, ok, err, IOError_, NotFoundError
 
 
@@ -10,16 +12,13 @@ class OriginRepository(BaseRepository[Origin]):
 
     @classmethod
     def get_with_knowledges(cls, origin_id: int) -> Result[Origin, NotFoundError | IOError_]:
-        """Fetch an Origin eagerly loading its knowledges relationship."""
         try:
             with Database.session() as db:
-                from sqlalchemy.orm import joinedload
-                entity = (
-                    db.query(Origin)
+                entity = db.scalars(
+                    select(Origin)
                     .options(joinedload(Origin.knowledges))
-                    .filter(Origin.id == origin_id)
-                    .first()
-                )
+                    .where(Origin.id == origin_id)
+                ).first()
                 if entity is None:
                     return err(NotFoundError(
                         message="Origin not found",
@@ -39,12 +38,7 @@ class OriginKnowledgeRepository(BaseRepository[OriginKnowledge]):
     model = OriginKnowledge
 
     @classmethod
-    def get_by_id(cls, entity_id): raise NotImplementedError()
-
-    @classmethod
-    def get_by_composite_id(
-        cls, origin_id: int, knowledge_id: int,
-    ) -> Result[OriginKnowledge, NotFoundError | IOError_]:
+    def get_by_composite_id(cls, origin_id: int, knowledge_id: int) -> Result[OriginKnowledge, NotFoundError | IOError_]:
         try:
             with Database.session() as db:
                 entity = db.get(OriginKnowledge, (origin_id, knowledge_id))
@@ -63,9 +57,7 @@ class OriginKnowledgeRepository(BaseRepository[OriginKnowledge]):
             ))
 
     @classmethod
-    def delete_by_composite_id(
-        cls, origin_id: int, knowledge_id: int,
-    ) -> Result[None, NotFoundError | IOError_]:
+    def delete_by_composite_id(cls, origin_id: int, knowledge_id: int) -> Result[None, NotFoundError | IOError_]:
         try:
             with Database.session() as db:
                 entity = db.get(OriginKnowledge, (origin_id, knowledge_id))
@@ -88,11 +80,10 @@ class OriginKnowledgeRepository(BaseRepository[OriginKnowledge]):
     def get_by_origin(cls, origin_id: int) -> Result[Sequence[OriginKnowledge], IOError_]:
         try:
             with Database.session() as db:
-                entities = (
-                    db.query(OriginKnowledge)
-                    .filter(OriginKnowledge.origin_id == origin_id)
-                    .all()
-                )
+                entities = db.scalars(
+                    select(OriginKnowledge)
+                    .where(OriginKnowledge.origin_id == origin_id)
+                ).all()
                 for e in entities:
                     db.expunge(e)
                 return ok(entities)
