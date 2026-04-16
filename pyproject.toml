@@ -1,0 +1,11 @@
+[project]
+name = "algophilia"
+version = "0.1.0"
+description = "
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "flet>=0.84.0",
+    "result>=0.17.0",
+    "sqlalchemy>=2.0.49",
+]
