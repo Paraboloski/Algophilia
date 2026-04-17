@@ -12,7 +12,7 @@
  ┃ ┗ 📂 src                     # Interface source code
  ┃   ┣ 📂 components            # Reusable Atomic UI components and Layouts
  ┃   ┗ 📂 views                 # Main pages and design documentation
- ┣ 📂 middleware                # Intermediate layer between DB and Business Logic
+ ┣ 📂 middleware                # Intermediate layer between UI, DB and Business Logic
  ┃ ┣ 📂 assets                  # Data models and templates management
  ┃ ┃ ┣ 📂 models                # Entity schema definitions (SQLAlchemy/Pydantic)
  ┃ ┃ ┗ 📂 templates             # Base structures for creating new objects
