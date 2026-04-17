@@ -33,7 +33,6 @@ Il progetto consiste nello sviluppo di una **Companion App** per sistemi Android
 ### 4.4 Utility di Gioco
 * **Dice Roller:** Un lanciatore di dadi integrato (d4, d6, d8, d10, d12, d20, d100) con log dei risultati e gif / risultati.
 * **Coin Flip:** Un lanciatore di monete integrato (testa, croce) con log dei risultati e gif / animazione.
-* **Gestione Slot Incantesimi:** Contatori per gli slot incantesimi consumati e totali per livello.
 
 ## 5. Requisiti Non Funzionali
 

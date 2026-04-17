@@ -2,7 +2,6 @@ from typing import Any, TYPE_CHECKING
 from sqlalchemy import String, Text, Column, ForeignKey
 from sqlmodel import SQLModel, Field, Relationship
 
-
 if TYPE_CHECKING:
     from middleware.assets.models.core.stats import Stat
     from middleware.assets.models.core.souls import Soul

@@ -8,6 +8,7 @@ dependencies = [
     "aiosqlite>=0.22.1",
     "dotenv>=0.9.9",
     "flet>=0.84.0",
+    "flet-lottie>=0.2.1",
     "pydantic>=2.13.2",
     "result>=0.17.0",
     "sqlalchemy>=2.0.49",
