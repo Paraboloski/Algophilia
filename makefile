@@ -4,6 +4,9 @@ ifneq (,$(wildcard ./.env))
 endif
 
 push:
-	@ cmd\push.bat
+	@cmd\push.bat
 
-.PHONY: push
+dev:
+	@.venv\Scripts\python main.py
+
+.PHONY: push dev
