@@ -5,7 +5,11 @@ description = ""
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
+    "aiosqlite>=0.22.1",
+    "dotenv>=0.9.9",
     "flet>=0.84.0",
+    "pydantic>=2.13.2",
     "result>=0.17.0",
     "sqlalchemy>=2.0.49",
+    "sqlmodel>=0.0.38",
 ]

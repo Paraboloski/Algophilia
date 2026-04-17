@@ -1,27 +1,39 @@
 import sys
 import logging
+import asyncio
 from Backend.api.data import Database
 from Backend.api.service import seed
+from middleware.config.core.logger import setup_logging
 
-def main():
-    logging.basicConfig(
-        level=logging.INFO,
-        format="%(levelname)s: %(message)s",
-        stream=sys.stdout
-    )
+logger = logging.getLogger(__name__)
 
-    init_result = Database.init_db()
-    if init_result.is_err():
-        print(f"Error initializing database: {init_result.unwrap_err()}")
-        sys.exit(1)
-    
+async def main():
+    listener = setup_logging()
+
     try:
-        seed.run_seed()
-    except Exception as e:
-        print(f"An unexpected error occurred during seeding: {e}")
+        logger.info("Avvio applicazione")
+
+        logger.info("Inizializzazione database...")
+        init_result = await Database.init_db()
+
+        if init_result.is_err():
+            logger.error("Errore durante l'inizializzazione del database: %s", init_result.unwrap_err())
+            sys.exit(1)
+
+        logger.info("Database inizializzato correttamente")
+
+        logger.info("Avvio seed dati...")
+        await seed.run_seed()
+        logger.info("Seed completato con successo")
+        logger.info("Esecuzione completata con successo")
+
+    except Exception:
+        logger.exception("Errore critico non gestito")
         sys.exit(1)
-        
-    print(f"App init OK!")
+
+    finally:
+        listener.stop()
+
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())

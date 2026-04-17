@@ -2,49 +2,64 @@ from __future__ import annotations
 
 import logging
 from typing import Any
-from Backend.api.templates import feats, spells
-from Backend.api.models.core.skills import Enhanced, Skill, SkillFeat, SkillSpell, SkillType, God
-from Backend.api.data.repository import EnhancedRepository, SkillRepository, SkillFeatRepository, SkillSpellRepository
+from middleware.assets.templates import feats, spells
+from middleware.assets.models.core.skills import Enhanced, Skill, SkillFeat, SkillSpell, SkillType, God
+from Backend.api.repository import EnhancedRepository, SkillRepository, SkillFeatRepository, SkillSpellRepository
 
 log = logging.getLogger(__name__)
 
-def _load_existing_skill_labels(skill_type: SkillType) -> set[str]:
-    result = SkillRepository.get_by_type(skill_type)
+async def _load_existing_skill_labels(skill_type: SkillType) -> set[str]:
+    result = await SkillRepository.get_by_type(skill_type)
     if result.is_err():
         log.error("Impossibile caricare le skill esistenti (%s): %s", skill_type, result.unwrap_err())
         return set()
-    return {skill.label for skill in result.unwrap()}
+
+    skills = result.unwrap()
+    labels = {skill.label for skill in skills}
+
+    log.debug("Caricate %d skill esistenti per tipo %s", len(labels), skill_type.value)
+    return labels
 
 
-def _load_existing_enhanced_labels() -> set[str]:
-    result = EnhancedRepository.get_all()
+async def _load_existing_enhanced_labels() -> set[str]:
+    result = await EnhancedRepository.get_all()
     if result.is_err():
         log.error("Impossibile caricare gli Enhanced esistenti: %s", result.unwrap_err())
         return set()
-    return {e.label for e in result.unwrap()}
+
+    enhanced_list = result.unwrap()
+    labels = {e.label for e in enhanced_list}
+
+    log.debug("Caricati %d enhanced esistenti", len(labels))
+
+    return labels
 
 
-def _get_or_create_enhanced(label: str, description: str | None, existing_labels: set[str]) -> Enhanced | None:
+async def _get_or_create_enhanced(label: str, description: str | None, existing_labels: set[str]) -> Enhanced | None:
     if label in existing_labels:
-        result = EnhancedRepository.get_by_label(label)
+        result = await EnhancedRepository.get_by_label(label)
         if result.is_err():
             log.error("Enhanced '%s' segnalato come esistente ma non trovato: %s", label, result.unwrap_err())
             return None
         return result.unwrap()
 
     enhanced = Enhanced(label=label, description=description)
-    result = EnhancedRepository.create(enhanced)
+
+    result = await EnhancedRepository.create(enhanced)
     if result.is_err():
-        log.error("Impossibile creare Enhanced '%s': %s", label, result.unwrap_err())
+        log.error( "Impossibile creare Enhanced '%s': %s", label, result.unwrap_err())
         return None
 
     existing_labels.add(label)
+
     log.debug("Enhanced creato: %s", label)
+
     return result.unwrap()
 
 
-def _seed_feats(feats: list[dict[str, Any]], existing_labels: set[str]) -> tuple[int, int]:
-    inserted = skipped = 0
+async def _seed_feats(feats: list[dict[str, Any]], existing_labels: set[str]) -> tuple[int, int]:
+    inserted = 0
+    skipped = 0
 
     for feat_data in feats:
         label: str = feat_data["name"]
@@ -59,29 +74,32 @@ def _seed_feats(feats: list[dict[str, Any]], existing_labels: set[str]) -> tuple
             description=feat_data.get("description"),
             type=SkillType.feat,
         )
-        skill_result = SkillRepository.create(skill)
+
+        skill_result = await SkillRepository.create(skill)
         if skill_result.is_err():
-            log.error("Impossibile creare Skill '%s': %s",
-                      label, skill_result.unwrap_err())
+            log.error("Impossibile creare Skill '%s': %s", label, skill_result.unwrap_err())
             continue
 
         created_skill = skill_result.unwrap()
 
         skill_feat = SkillFeat(skill_id=created_skill.id)
-        feat_result = SkillFeatRepository.create(skill_feat)
+
+        feat_result = await SkillFeatRepository.create(skill_feat)
         if feat_result.is_err():
             log.error("Impossibile creare SkillFeat per '%s': %s", label, feat_result.unwrap_err())
             continue
 
         existing_labels.add(label)
-        log.debug("Talento inserito: %s", label)
         inserted += 1
+
+        log.debug("Talento inserito: %s", label)
 
     return inserted, skipped
 
 
-def _seed_spells(spells: list[dict[str, Any]], existing_skill_labels: set[str], existing_enhanced_labels: set[str]) -> tuple[int, int]:
-    inserted = skipped = 0
+async def _seed_spells(spells: list[dict[str, Any]], existing_skill_labels: set[str], existing_enhanced_labels: set[str]) -> tuple[int, int]:
+    inserted = 0
+    skipped = 0
 
     for spell_data in spells:
         label: str = spell_data["name"]
@@ -96,7 +114,7 @@ def _seed_spells(spells: list[dict[str, Any]], existing_skill_labels: set[str], 
 
         if enhancements:
             enh_data = enhancements[0]
-            enhanced = _get_or_create_enhanced(
+            enhanced = await _get_or_create_enhanced(
                 label=enh_data["name"],
                 description=enh_data.get("description"),
                 existing_labels=existing_enhanced_labels,
@@ -107,10 +125,10 @@ def _seed_spells(spells: list[dict[str, Any]], existing_skill_labels: set[str], 
             description=spell_data.get("description"),
             type=SkillType.spell,
         )
-        skill_result = SkillRepository.create(skill)
+
+        skill_result = await SkillRepository.create(skill)
         if skill_result.is_err():
-            log.error("Impossibile creare Skill '%s': %s",
-                      label, skill_result.unwrap_err())
+            log.error("Impossibile creare Skill '%s': %s", label, skill_result.unwrap_err())
             continue
 
         created_skill = skill_result.unwrap()
@@ -122,31 +140,42 @@ def _seed_spells(spells: list[dict[str, Any]], existing_skill_labels: set[str], 
             skill_id=created_skill.id,
             affinity_with=god_value,
             affinity_level=affinity_level,
-            enhanced_effect_id=enhanced.id if enhanced is not None else None,
+            enhanced_effect_id=enhanced.id if enhanced else None,
         )
-        spell_result = SkillSpellRepository.create(skill_spell)
+
+        spell_result = await SkillSpellRepository.create(skill_spell)
         if spell_result.is_err():
             log.error("Impossibile creare SkillSpell per '%s': %s", label, spell_result.unwrap_err())
             continue
 
         existing_skill_labels.add(label)
-        log.debug("Incantesimo inserito: %s (affinità=%s)", label, god_value.value)
         inserted += 1
 
+        log.debug("Incantesimo inserito: %s (affinità=%s)", label, god_value.value)
+        
     return inserted, skipped
 
 
-def run_seed() -> None:
-    logging.basicConfig(level=logging.INFO)
+async def run_seed() -> None:
+    log.info("=== Avvio procedura di seeding ===")
 
-    existing_feat_labels = _load_existing_skill_labels(SkillType.feat)
-    existing_spell_labels = _load_existing_skill_labels(SkillType.spell)
-    existing_enhanced_labels = _load_existing_enhanced_labels()
+    existing_feat_labels = await _load_existing_skill_labels(SkillType.feat)
+    existing_spell_labels = await _load_existing_skill_labels(SkillType.spell)
+    existing_enhanced_labels = await _load_existing_enhanced_labels()
 
-    feat_ins, feat_skip = _seed_feats(feats, existing_feat_labels)
-    log.info("Talenti → inseriti: %d | saltati: %d", feat_ins, feat_skip)
+    log.info(
+        "Stato iniziale → feats: %d | spells: %d | enhanced: %d",
+        len(existing_feat_labels),
+        len(existing_spell_labels),
+        len(existing_enhanced_labels),
+    )
 
-    spell_ins, spell_skip = _seed_spells(spells, existing_spell_labels, existing_enhanced_labels)
-    log.info("Incantesimi → inseriti: %d | saltati: %d", spell_ins, spell_skip)
+    feat_ins, feat_skip = await _seed_feats(feats, existing_feat_labels)
+    log.info("Talenti → inseriti: %d | saltati: %d | totali: %d", feat_ins, feat_skip, len(existing_feat_labels))
 
-    log.info("=== Seed completato ===")
+    spell_ins, spell_skip = await _seed_spells(spells, existing_spell_labels, existing_enhanced_labels)
+    log.info("Incantesimi → inseriti: %d | saltati: %d | totali: %d", spell_ins, spell_skip, len(existing_spell_labels))
+
+    log.info("Enhanced totali: %d", len(existing_enhanced_labels))
+
+    log.info("=== Seed completato con successo ===")

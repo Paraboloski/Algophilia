@@ -1,4 +1,5 @@
 cmd/
+logs/
 dist/
 build/
 .venv/
@@ -7,6 +8,8 @@ __pycache__/
 
 
 .env
+.log
+.txt
 *.db
 *.log
 *.sqlite
