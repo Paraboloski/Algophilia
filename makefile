@@ -6,7 +6,7 @@ endif
 push:
 	@cmd\push.bat
 
-dev:
+main:
 	@.venv\Scripts\python main.py
 
 .PHONY: push dev
