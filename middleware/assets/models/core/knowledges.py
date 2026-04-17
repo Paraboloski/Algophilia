@@ -1,8 +1,9 @@
+from typing import Any
 from sqlmodel import SQLModel, Field
 from sqlalchemy import String, Text, Column
 
 class Knowledge(SQLModel, table=True):
-    __tablename__ = "knowledge"
+    __tablename__: Any = "knowledge"
 
     id: int | None = Field(default=None, primary_key=True)
     label: str = Field(sa_column=Column(String(100)))

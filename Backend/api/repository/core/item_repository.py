@@ -1,10 +1,24 @@
 from typing import Sequence
 from sqlalchemy import select
-from .base import BaseRepository
-from Backend.api.data import Database
-from sqlalchemy.orm import joinedload
+from middleware.db import Database
+from .base import BaseRepository, eager_joinedload, sql_eq
 from middleware.config import Result, ok, err, IOError_, NotFoundError
 from middleware.assets.models.core.items import Item, ItemArtillery, ItemArmor, ItemMisc, Inventory, InventoryItem
+
+class ItemArtilleryRepository(BaseRepository[ItemArtillery]):
+    model = ItemArtillery
+
+
+class ItemArmorRepository(BaseRepository[ItemArmor]):
+    model = ItemArmor
+
+
+class ItemMiscRepository(BaseRepository[ItemMisc]):
+    model = ItemMisc
+
+
+class InventoryRepository(BaseRepository[Inventory]):
+    model = Inventory
 
 
 class ItemRepository(BaseRepository[Item]):
@@ -17,11 +31,11 @@ class ItemRepository(BaseRepository[Item]):
                 result = await db.execute(
                     select(Item)
                     .options(
-                        joinedload(Item.artillery),
-                        joinedload(Item.armor),
-                        joinedload(Item.misc),
+                        eager_joinedload(Item.artillery),
+                        eager_joinedload(Item.armor),
+                        eager_joinedload(Item.misc),
                     )
-                    .where(Item.id == entity_id)
+                    .where(sql_eq(Item.id, entity_id))
                 )
                 entity = result.scalars().unique().first()
                 if entity is None:
@@ -43,7 +57,7 @@ class ItemRepository(BaseRepository[Item]):
         try:
             async with Database.get_async_session() as db:
                 result = await db.execute(
-                    select(Item).where(Item.category == category)
+                    select(Item).where(sql_eq(Item.category, category))
                 )
                 entities = result.scalars().all()
                 for e in entities:
@@ -55,30 +69,14 @@ class ItemRepository(BaseRepository[Item]):
                 target=str(exc),
             ))
 
-
-class ItemArtilleryRepository(BaseRepository[ItemArtillery]):
-    model = ItemArtillery
-
-
-class ItemArmorRepository(BaseRepository[ItemArmor]):
-    model = ItemArmor
-
-
-class ItemMiscRepository(BaseRepository[ItemMisc]):
-    model = ItemMisc
-
-
-class InventoryRepository(BaseRepository[Inventory]):
-    model = Inventory
-
     @classmethod
     async def get_by_character(cls, character_id: int) -> Result[Inventory, NotFoundError | IOError_]:
         try:
             async with Database.get_async_session() as db:
                 result = await db.execute(
                     select(Inventory)
-                    .options(joinedload(Inventory.items))
-                    .where(Inventory.character_id == character_id)
+                    .options(eager_joinedload(Inventory.items))
+                    .where(sql_eq(Inventory.character_id, character_id))
                 )
                 entity = result.scalars().unique().first()
                 if entity is None:
@@ -105,7 +103,7 @@ class InventoryItemRepository(BaseRepository[InventoryItem]):
             async with Database.get_async_session() as db:
                 result = await db.execute(
                     select(InventoryItem)
-                    .where(InventoryItem.inventory_id == inventory_id)
+                    .where(sql_eq(InventoryItem.inventory_id, inventory_id))
                 )
                 entities = result.scalars().all()
                 for e in entities:

@@ -1,10 +1,16 @@
 from typing import Sequence
 from sqlalchemy import select
-from .base import BaseRepository
-from Backend.api.data import Database
-from sqlalchemy.orm import joinedload
+from middleware.db import Database
+from .base import BaseRepository, eager_joinedload, sql_eq
 from middleware.config import Result, ok, err, IOError_, NotFoundError
 from middleware.assets.models.core.skills import Enhanced, Skill, SkillFeat, SkillSpell
+
+class SkillFeatRepository(BaseRepository[SkillFeat]):
+    model = SkillFeat
+
+
+class SkillSpellRepository(BaseRepository[SkillSpell]):
+    model = SkillSpell
 
 
 class EnhancedRepository(BaseRepository[Enhanced]):
@@ -15,7 +21,7 @@ class EnhancedRepository(BaseRepository[Enhanced]):
         try:
             async with Database.get_async_session() as db:
                 result = await db.execute(
-                    select(Enhanced).where(Enhanced.label == label).limit(1)
+                    select(Enhanced).where(sql_eq(Enhanced.label, label)).limit(1)
                 )
                 entity = result.scalars().first()
                 if entity is None:
@@ -41,7 +47,7 @@ class SkillRepository(BaseRepository[Skill]):
         try:
             async with Database.get_async_session() as db:
                 result = await db.execute(
-                    select(Skill).where(Skill.label == label).limit(1)
+                    select(Skill).where(sql_eq(Skill.label, label)).limit(1)
                 )
                 entity = result.scalars().first()
                 if entity is None:
@@ -65,10 +71,10 @@ class SkillRepository(BaseRepository[Skill]):
                 result = await db.execute(
                     select(Skill)
                     .options(
-                        joinedload(Skill.feat),
-                        joinedload(Skill.spell),
+                        eager_joinedload(Skill.feat),
+                        eager_joinedload(Skill.spell),
                     )
-                    .where(Skill.id == entity_id)
+                    .where(sql_eq(Skill.id, entity_id))
                 )
                 entity = result.scalars().unique().first()
                 if entity is None:
@@ -90,7 +96,7 @@ class SkillRepository(BaseRepository[Skill]):
         try:
             async with Database.get_async_session() as db:
                 result = await db.execute(
-                    select(Skill).where(Skill.type == skill_type)
+                    select(Skill).where(sql_eq(Skill.type, skill_type))
                 )
                 entities = result.scalars().all()
                 for e in entities:
@@ -101,11 +107,3 @@ class SkillRepository(BaseRepository[Skill]):
                 message="Failed to fetch Skills by type",
                 target=str(exc),
             ))
-
-
-class SkillFeatRepository(BaseRepository[SkillFeat]):
-    model = SkillFeat
-
-
-class SkillSpellRepository(BaseRepository[SkillSpell]):
-    model = SkillSpell

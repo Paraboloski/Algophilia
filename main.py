@@ -1,7 +1,7 @@
 import sys
 import logging
 import asyncio
-from Backend.api.data import Database
+from middleware.db import Database
 from Backend.api.service import seed
 from middleware.config.core.logger import setup_logging
 

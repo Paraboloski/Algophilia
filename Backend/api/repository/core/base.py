@@ -1,11 +1,20 @@
 from __future__ import annotations
 
 from sqlalchemy import select
-from Backend.api.data import Database
-from typing import Generic, TypeVar, Type, Sequence
+from sqlalchemy.orm import joinedload
+from middleware.db import Database
+from typing import Any, Generic, TypeVar, Type, Sequence, cast
 from middleware.config import Result, ok, err, IOError_, NotFoundError
 
 T = TypeVar("T")
+
+
+def eager_joinedload(attr: Any) -> Any:
+    return joinedload(cast(Any, attr))
+
+
+def sql_eq(column: Any, value: Any) -> Any:
+    return cast(Any, column) == value
 
 class BaseRepository(Generic[T]):
     model: Type[T]

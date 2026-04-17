@@ -1,8 +1,7 @@
 from typing import Sequence
-
 from sqlalchemy import select
-from .base import BaseRepository
-from Backend.api.data import Database
+from middleware.db import Database
+from .base import BaseRepository, sql_eq
 from middleware.assets.models.core.souls import Soul, Trait
 from middleware.config import Result, ok, err, IOError_
 
@@ -19,7 +18,7 @@ class SoulRepository(BaseRepository[Soul]):
         try:
             async with Database.get_async_session() as db:
                 result = await db.execute(
-                    select(Soul).where(Soul.soul_trait_id == trait_id)
+                    select(Soul).where(sql_eq(Soul.soul_trait_id, trait_id))
                 )
                 entities = result.scalars().all()
                 for e in entities:

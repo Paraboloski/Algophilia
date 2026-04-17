@@ -1,8 +1,7 @@
 from typing import Sequence
 from sqlalchemy import select
-from .base import BaseRepository
-from Backend.api.data import Database
-from sqlalchemy.orm import joinedload
+from middleware.db import Database
+from .base import BaseRepository, eager_joinedload, sql_eq
 from middleware.config import Result, ok, err, IOError_, NotFoundError
 from middleware.assets.models.core.characters import Character, CharacterStat, CharacterCondition, CharacterKnowledge, CharacterSkill
 
@@ -17,15 +16,15 @@ class CharacterRepository(BaseRepository[Character]):
                 result = await db.execute(
                     select(Character)
                     .options(
-                        joinedload(Character.soul),
-                        joinedload(Character.origin),
-                        joinedload(Character.inventory),
-                        joinedload(Character.stats),
-                        joinedload(Character.skills),
-                        joinedload(Character.conditions),
-                        joinedload(Character.knowledges),
+                        eager_joinedload(Character.soul),
+                        eager_joinedload(Character.origin),
+                        eager_joinedload(Character.inventory),
+                        eager_joinedload(Character.stats),
+                        eager_joinedload(Character.skills),
+                        eager_joinedload(Character.conditions),
+                        eager_joinedload(Character.knowledges),
                     )
-                    .where(Character.id == character_id)
+                    .where(sql_eq(Character.id, character_id))
                 )
                 entity = result.scalars().unique().first()
                 if entity is None:
@@ -91,7 +90,7 @@ class CharacterStatRepository(BaseRepository[CharacterStat]):
             async with Database.get_async_session() as db:
                 result = await db.execute(
                     select(CharacterStat)
-                    .where(CharacterStat.character_id == character_id)
+                    .where(sql_eq(CharacterStat.character_id, character_id))
                 )
                 entities = result.scalars().all()
                 for e in entities:
@@ -153,7 +152,7 @@ class CharacterConditionRepository(BaseRepository[CharacterCondition]):
             async with Database.get_async_session() as db:
                 result = await db.execute(
                     select(CharacterCondition)
-                    .where(CharacterCondition.character_id == character_id)
+                    .where(sql_eq(CharacterCondition.character_id, character_id))
                 )
                 entities = result.scalars().all()
                 for e in entities:
@@ -216,7 +215,7 @@ class CharacterKnowledgeRepository(BaseRepository[CharacterKnowledge]):
             async with Database.get_async_session() as db:
                 result = await db.execute(
                     select(CharacterKnowledge)
-                    .where(CharacterKnowledge.character_id == character_id)
+                    .where(sql_eq(CharacterKnowledge.character_id, character_id))
                 )
                 entities = result.scalars().all()
                 for e in entities:
@@ -277,7 +276,7 @@ class CharacterSkillRepository(BaseRepository[CharacterSkill]):
             async with Database.get_async_session() as db:
                 result = await db.execute(
                     select(CharacterSkill)
-                    .where(CharacterSkill.character_id == character_id)
+                    .where(sql_eq(CharacterSkill.character_id, character_id))
                 )
                 entities = result.scalars().all()
                 for e in entities:

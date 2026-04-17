@@ -1,16 +1,17 @@
+from typing import Any
 from sqlmodel import SQLModel, Field, Relationship
-from sqlalchemy import String, Text, Column
+from sqlalchemy import String, Text, Column, ForeignKey
 
 class OriginKnowledge(SQLModel, table=True):
-    __tablename__ = "origin_knowledge"
+    __tablename__: Any = "origin_knowledge"
 
-    origin_id: int = Field(foreign_key="origin.id", ondelete="CASCADE", primary_key=True)
-    knowledge_id: int = Field(foreign_key="knowledge.id", ondelete="CASCADE", primary_key=True)
+    origin_id: int = Field(sa_column=Column(ForeignKey("origin.id", ondelete="CASCADE"), primary_key=True))
+    knowledge_id: int = Field(sa_column=Column(ForeignKey("knowledge.id", ondelete="CASCADE"), primary_key=True))
 
     origin: "Origin" = Relationship(back_populates="knowledges")
 
 class Origin(SQLModel, table=True):
-    __tablename__ = "origin"
+    __tablename__: Any = "origin"
 
     id: int | None = Field(default=None, primary_key=True)
     label: str = Field(sa_column=Column(String(100)))

@@ -1,8 +1,7 @@
 from typing import Sequence
 from sqlalchemy import select
-from .base import BaseRepository
-from Backend.api.data import Database
-from sqlalchemy.orm import joinedload
+from middleware.db import Database
+from .base import BaseRepository, eager_joinedload, sql_eq
 from middleware.config import Result, ok, err, IOError_, NotFoundError
 from middleware.assets.models.core.stats import Stat, StatAttribute, StatResource, StatProgress
 
@@ -17,11 +16,11 @@ class StatRepository(BaseRepository[Stat]):
                 result = await db.execute(
                     select(Stat)
                     .options(
-                        joinedload(Stat.attribute),
-                        joinedload(Stat.resource),
-                        joinedload(Stat.progress),
+                        eager_joinedload(Stat.attribute),
+                        eager_joinedload(Stat.resource),
+                        eager_joinedload(Stat.progress),
                     )
-                    .where(Stat.id == entity_id)
+                    .where(sql_eq(Stat.id, entity_id))
                 )
                 entity = result.scalars().unique().first()
                 if entity is None:
@@ -43,7 +42,7 @@ class StatRepository(BaseRepository[Stat]):
         try:
             async with Database.get_async_session() as db:
                 result = await db.execute(
-                    select(Stat).where(Stat.type == stat_type)
+                    select(Stat).where(sql_eq(Stat.type, stat_type))
                 )
                 entities = result.scalars().all()
                 for e in entities:

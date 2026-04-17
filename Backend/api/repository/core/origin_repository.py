@@ -1,8 +1,7 @@
 from typing import Sequence
 from sqlalchemy import select
-from .base import BaseRepository
-from Backend.api.data import Database
-from sqlalchemy.orm import joinedload
+from middleware.db import Database
+from .base import BaseRepository, eager_joinedload, sql_eq
 from middleware.assets.models.core.origins import Origin, OriginKnowledge
 from middleware.config import Result, ok, err, IOError_, NotFoundError
 
@@ -16,8 +15,8 @@ class OriginRepository(BaseRepository[Origin]):
             async with Database.get_async_session() as db:
                 result = await db.execute(
                     select(Origin)
-                    .options(joinedload(Origin.knowledges))
-                    .where(Origin.id == origin_id)
+                    .options(eager_joinedload(Origin.knowledges))
+                    .where(sql_eq(Origin.id, origin_id))
                 )
                 entity = result.scalars().unique().first()
                 if entity is None:
@@ -83,7 +82,7 @@ class OriginKnowledgeRepository(BaseRepository[OriginKnowledge]):
             async with Database.get_async_session() as db:
                 result = await db.execute(
                     select(OriginKnowledge)
-                    .where(OriginKnowledge.origin_id == origin_id)
+                    .where(sql_eq(OriginKnowledge.origin_id, origin_id))
                 )
                 entities = result.scalars().all()
                 for e in entities:
