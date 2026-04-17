@@ -8,12 +8,10 @@ from Backend.api.data.repository import EnhancedRepository, SkillRepository, Ski
 
 log = logging.getLogger(__name__)
 
-
 def _load_existing_skill_labels(skill_type: SkillType) -> set[str]:
     result = SkillRepository.get_by_type(skill_type)
     if result.is_err():
-        log.error("Impossibile caricare le skill esistenti (%s): %s",
-                  skill_type, result.unwrap_err())
+        log.error("Impossibile caricare le skill esistenti (%s): %s", skill_type, result.unwrap_err())
         return set()
     return {skill.label for skill in result.unwrap()}
 
@@ -21,8 +19,7 @@ def _load_existing_skill_labels(skill_type: SkillType) -> set[str]:
 def _load_existing_enhanced_labels() -> set[str]:
     result = EnhancedRepository.get_all()
     if result.is_err():
-        log.error("Impossibile caricare gli Enhanced esistenti: %s",
-                  result.unwrap_err())
+        log.error("Impossibile caricare gli Enhanced esistenti: %s", result.unwrap_err())
         return set()
     return {e.label for e in result.unwrap()}
 
@@ -31,16 +28,14 @@ def _get_or_create_enhanced(label: str, description: str | None, existing_labels
     if label in existing_labels:
         result = EnhancedRepository.get_by_label(label)
         if result.is_err():
-            log.error(
-                "Enhanced '%s' segnalato come esistente ma non trovato: %s", label, result.unwrap_err())
+            log.error("Enhanced '%s' segnalato come esistente ma non trovato: %s", label, result.unwrap_err())
             return None
         return result.unwrap()
 
     enhanced = Enhanced(label=label, description=description)
     result = EnhancedRepository.create(enhanced)
     if result.is_err():
-        log.error("Impossibile creare Enhanced '%s': %s",
-                  label, result.unwrap_err())
+        log.error("Impossibile creare Enhanced '%s': %s", label, result.unwrap_err())
         return None
 
     existing_labels.add(label)
@@ -75,8 +70,7 @@ def _seed_feats(feats: list[dict[str, Any]], existing_labels: set[str]) -> tuple
         skill_feat = SkillFeat(skill_id=created_skill.id)
         feat_result = SkillFeatRepository.create(skill_feat)
         if feat_result.is_err():
-            log.error("Impossibile creare SkillFeat per '%s': %s",
-                      label, feat_result.unwrap_err())
+            log.error("Impossibile creare SkillFeat per '%s': %s", label, feat_result.unwrap_err())
             continue
 
         existing_labels.add(label)
@@ -132,12 +126,11 @@ def _seed_spells(spells: list[dict[str, Any]], existing_skill_labels: set[str], 
         )
         spell_result = SkillSpellRepository.create(skill_spell)
         if spell_result.is_err():
-            log.error("Impossibile creare SkillSpell per '%s': %s",
-                      label, spell_result.unwrap_err())
+            log.error("Impossibile creare SkillSpell per '%s': %s", label, spell_result.unwrap_err())
             continue
 
         existing_skill_labels.add(label)
-        log.debug("Incantesimo inserito: %s (dio=%s)", label, god_value.value)
+        log.debug("Incantesimo inserito: %s (affinità=%s)", label, god_value.value)
         inserted += 1
 
     return inserted, skipped
@@ -153,8 +146,7 @@ def run_seed() -> None:
     feat_ins, feat_skip = _seed_feats(feats, existing_feat_labels)
     log.info("Talenti → inseriti: %d | saltati: %d", feat_ins, feat_skip)
 
-    spell_ins, spell_skip = _seed_spells(
-        spells, existing_spell_labels, existing_enhanced_labels)
+    spell_ins, spell_skip = _seed_spells(spells, existing_spell_labels, existing_enhanced_labels)
     log.info("Incantesimi → inseriti: %d | saltati: %d", spell_ins, spell_skip)
 
     log.info("=== Seed completato ===")
