@@ -81,6 +81,9 @@ async def _seed_feats(feats: list[dict[str, Any]], existing_labels: set[str]) ->
             continue
 
         created_skill = skill_result.unwrap()
+        if created_skill.id is None:
+            log.error("Impossibile recuperare l'ID per la Skill '%s'", label)
+            continue
 
         skill_feat = SkillFeat(skill_id=created_skill.id)
 
@@ -132,6 +135,9 @@ async def _seed_spells(spells: list[dict[str, Any]], existing_skill_labels: set[
             continue
 
         created_skill = skill_result.unwrap()
+        if created_skill.id is None:
+            log.error("Impossibile recuperare l'ID per la Skill '%s'", label)
+            continue
 
         god_value: God = spell_data["god"]
         affinity_level: int | None = spell_data.get("affinity_level")
