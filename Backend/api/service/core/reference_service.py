@@ -1,7 +1,7 @@
 from typing import Sequence
+from middleware.config import Result, IOError_
 from middleware.assets.models.core.items import Item
 from middleware.assets.models.core.stats import Stat
-from middleware.config import Result, IOError_
 from middleware.assets.models.core.skills import Skill
 from middleware.assets.models.core.origins import Origin
 from middleware.assets.models.core.souls import Soul, Trait

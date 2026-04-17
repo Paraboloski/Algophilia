@@ -1,38 +1,39 @@
-import asyncio
 import random
+import asyncio
 import flet as ft
 import flet.canvas as cv
+from result import Ok, Err, Result
+from middleware.config import ValidationError
 from typing import Optional, Callable, List, cast, TypedDict
 
 try:
     from Backend.util.dice import roll, DiceRollResult
 except ImportError:
-    # type: ignore[no-redef]
-    class DiceRollResult(TypedDict):
+    class DiceRollResult(TypedDict):  # type: ignore[no-redef]
         total: int
         rolls: List[int]
         expression: str
         bonus: int
 
-    # type: ignore[misc]
-    def roll(quantity: int, sides: int, bonus: int = 0) -> DiceRollResult:
+    def roll(quantity: int, sides: int, bonus: int = 0) -> Result[DiceRollResult, ValidationError]:  # type: ignore[misc]
         rolls = [random.randint(1, sides) for _ in range(quantity)]
-        return DiceRollResult(
-            total=sum(rolls) + bonus,
-            rolls=rolls,
-            expression=f"{quantity}d{sides}",
-            bonus=bonus,
-        )
+        result: DiceRollResult = {
+            "total": sum(rolls) + bonus,
+            "rolls": rolls,
+            "expression": f"{quantity}d{sides}",
+            "bonus": bonus,
+        }
+        return Ok(result)
 
 
 class DiceSetRow(ft.Row):
     def __init__(self, on_delete: Callable, on_add: Callable, show_add: bool = False):
         super().__init__()
-        self.spacing = 10
-        self.on_add = on_add
         self.on_delete = on_delete
-        self.alignment = ft.MainAxisAlignment.CENTER
+        self.on_add = on_add
         self.vertical_alignment = ft.CrossAxisAlignment.CENTER
+        self.spacing = 10
+        self.alignment = ft.MainAxisAlignment.CENTER
 
         self.qty_dropdown = ft.Dropdown(
             value="1", width=90,
@@ -42,8 +43,7 @@ class DiceSetRow(ft.Row):
 
         self.sides_dropdown = ft.Dropdown(
             value="20", width=100,
-            options=[ft.dropdown.Option(str(s))
-                     for s in [4, 6, 8, 10, 12, 20, 100]],
+            options=[ft.dropdown.Option(str(s)) for s in [4, 6, 8, 10, 12, 20, 100]],
             text_style=ft.TextStyle(size=16, weight=ft.FontWeight.BOLD),
         )
 
@@ -59,8 +59,7 @@ class DiceSetRow(ft.Row):
             disabled=not show_add,
         )
 
-        self.controls = [self.qty_dropdown,
-                         self.sides_dropdown, self.add_btn, self.delete_btn]
+        self.controls = [self.qty_dropdown, self.sides_dropdown, self.add_btn, self.delete_btn]
 
 
 class DiceRoller(ft.Container):
@@ -112,22 +111,19 @@ class DiceRoller(ft.Container):
             ),
         )
 
-        self.total_text = ft.Text(
-            "", size=100, weight=ft.FontWeight.W_900, color="#FFD700")
-        self.continue_text = ft.Text(
-            "TOCCA PER CHIUDERE", size=14, weight=ft.FontWeight.BOLD, color="#BDBDBD")
+        self.total_text = ft.Text("", size=100, weight=ft.FontWeight.W_900, color="#FFD700")
+        self.continue_text = ft.Text("TOCCA PER CHIUDERE", size=14, weight=ft.FontWeight.BOLD, color="#BDBDBD")
 
         self.result_overlay = ft.Container(
             content=ft.Column(
                 [
-                    ft.Text("RISULTATO", size=12,
-                            weight=ft.FontWeight.BOLD, color="#FFD700"),
+                    ft.Text("RISULTATO", size=12, weight=ft.FontWeight.BOLD, color="#FFD700"),
                     self.total_text,
                     ft.Container(height=20),
                     self.continue_text,
                 ],
                 alignment=ft.MainAxisAlignment.CENTER,
-                horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                horizontal_alignment=ft.CrossAxisAlignment.CENTER,  # Fixed: was "center" string
             ),
             bgcolor="rgba(24, 24, 24, 0.7)",
             blur=ft.Blur(5, 5),
@@ -151,15 +147,12 @@ class DiceRoller(ft.Container):
             [
                 ft.Column(
                     [
-                        ft.Text("ALGOPHILIA", size=12,
-                                weight=ft.FontWeight.BOLD, color="#FFD700"),
+                        ft.Text("ALGOPHILIA", size=12, weight=ft.FontWeight.BOLD, color="#FFD700"),
                         ft.Divider(height=10, color="#333333"),
                         ft.Row(
                             [
-                                ft.Text("QTÀ",  size=10, weight=ft.FontWeight.BOLD,
-                                        color="#BDBDBD", width=90,  text_align=ft.TextAlign.CENTER),
-                                ft.Text("DADO", size=10, weight=ft.FontWeight.BOLD,
-                                        color="#BDBDBD", width=100, text_align=ft.TextAlign.CENTER),
+                                ft.Text("QTÀ",  size=10, weight=ft.FontWeight.BOLD, color="#BDBDBD", width=90,  text_align=ft.TextAlign.CENTER),
+                                ft.Text("DADO", size=10, weight=ft.FontWeight.BOLD, color="#BDBDBD", width=100, text_align=ft.TextAlign.CENTER),
                                 ft.Container(width=80),
                             ],
                             alignment=ft.MainAxisAlignment.CENTER,
@@ -191,8 +184,7 @@ class DiceRoller(ft.Container):
             for row in cast(List[DiceSetRow], self.dice_rows_container.controls):
                 row.add_btn.opacity = 0
                 row.add_btn.disabled = True
-            new_row = DiceSetRow(on_delete=self.remove_dice_row,
-                                 on_add=self.add_dice_row, show_add=True)
+            new_row = DiceSetRow(on_delete=self.remove_dice_row, on_add=self.add_dice_row, show_add=True)
             self.dice_rows_container.controls.append(new_row)
             if len(self.dice_rows_container.controls) == 4:
                 new_row.add_btn.opacity = 0
@@ -204,20 +196,18 @@ class DiceRoller(ft.Container):
         if len(self.dice_rows_container.controls) > 1:
             self.dice_rows_container.controls.remove(row)
             if len(self.dice_rows_container.controls) < 4:
-                last_row = cast(
-                    DiceSetRow, self.dice_rows_container.controls[-1])
+                last_row = cast(DiceSetRow, self.dice_rows_container.controls[-1])
                 last_row.add_btn.opacity = 1
                 last_row.add_btn.disabled = False
             self.update()
 
     async def roll_action(self, e):
-        self.roll_btn.disabled = True
-        self.dice_area.controls.clear()
-        self.result_overlay.opacity = 0
-        self.bonus_input.disabled = True
-        self.result_overlay.visible = False
         self.dice_rows_container.disabled = True
-
+        self.roll_btn.disabled = True
+        self.bonus_input.disabled = True
+        self.dice_area.controls.clear()
+        self.result_overlay.visible = False
+        self.result_overlay.opacity = 0
         self.update()
 
         dice_to_animate = []
@@ -226,7 +216,9 @@ class DiceRoller(ft.Container):
         for row in cast(List[DiceSetRow], self.dice_rows_container.controls):
             qty = int(row.qty_dropdown.value or "1")
             sides = int(row.sides_dropdown.value or "20")
-            res = roll(quantity=qty, sides=sides, bonus=0)
+            roll_result = roll(quantity=qty, sides=sides, bonus=0)
+            if isinstance(roll_result, Err): continue
+            res = roll_result.unwrap()
             final_total += sum(res["rolls"])
 
             color = self.DICE_COLORS.get(sides, "#FFD700")
@@ -236,13 +228,11 @@ class DiceRoller(ft.Container):
                 cp = cv.Canvas(width=70, height=70)
                 if poly_points == "circle":
                     cp.shapes.append(
-                        cv.Circle(35, 35, 30, ft.Paint(
-                            color=color, style=ft.PaintingStyle.FILL))
+                        cv.Circle(35, 35, 30, ft.Paint(color=color, style=ft.PaintingStyle.FILL))
                     )
                 elif isinstance(poly_points, list):
                     s = 0.6
-                    pts = [ft.Offset(p[0] * s + 10, p[1] * s + 10)
-                           for p in poly_points]
+                    pts = [ft.Offset(p[0] * s + 10, p[1] * s + 10) for p in poly_points]
                     cp.shapes.append(
                         cv.Path(
                             [cv.Path.MoveTo(pts[0].x, pts[0].y)]
@@ -252,27 +242,22 @@ class DiceRoller(ft.Container):
                         )
                     )
 
-                value_label = ft.Text(
-                    "?", size=20, weight=ft.FontWeight.BOLD, color="white")
+                value_label = ft.Text("?", size=20, weight=ft.FontWeight.BOLD, color="white")
                 d = ft.Container(
                     content=ft.Stack([cp, value_label]),
                     width=70, height=70,
                     scale=0,
                     top=random.randint(0, 50),
                     left=random.randint(40, 240),
-                    animate_scale=ft.Animation(
-                        400, ft.AnimationCurve.BOUNCE_OUT),
-                    animate_position=ft.Animation(
-                        400, ft.AnimationCurve.EASE_OUT),
-                    animate_rotation=ft.Animation(
-                        400, ft.AnimationCurve.EASE_OUT),
+                    animate_scale=ft.Animation(400, ft.AnimationCurve.BOUNCE_OUT),
+                    animate_position=ft.Animation(400, ft.AnimationCurve.EASE_OUT),
+                    animate_rotation=ft.Animation(400, ft.AnimationCurve.EASE_OUT),
                 )
                 self.dice_area.controls.append(d)
                 dice_to_animate.append((d, value_label, val, sides))
 
         self.update()
         await asyncio.sleep(0.1)
-
         for d, _label, _, _ in dice_to_animate:
             d.scale = 1.0
             d.top += 100
@@ -290,30 +275,25 @@ class DiceRoller(ft.Container):
             d.scale = 1.2
             d.rotate = 0
         self.update()
-
-        self.result_overlay.visible = True
         self.total_text.value = str(final_total)
-
+        self.result_overlay.visible = True
         self.update()
         await asyncio.sleep(0.5)
         self.result_overlay.opacity = 1
 
-        if hasattr(self, "_haptic"):
-            await self._haptic.heavy_impact()
+        if hasattr(self, "_haptic"): await self._haptic.heavy_impact()
         self.update()
 
     async def handle_exit(self, e):
         self.result_overlay.opacity = 0
         self.update()
         await asyncio.sleep(0.4)
-        self.roll_btn.disabled = False
-        self.bonus_input.disabled = False
         self.result_overlay.visible = False
         self.dice_rows_container.disabled = False
-
+        self.roll_btn.disabled = False
+        self.bonus_input.disabled = False
         self.dice_area.controls.clear()
         self.update()
         if self.on_close:
             result = self.on_close()
-            if asyncio.iscoroutine(result):
-                await result
+            if asyncio.iscoroutine(result): await result

@@ -1,8 +1,8 @@
 from typing import Sequence
 from sqlalchemy import select
 from middleware.db import Database
-from .base import BaseRepository, eager_joinedload, sql_eq
 from middleware.config import Result, ok, err, IOError_, NotFoundError
+from Backend.api.repository.core.base import BaseRepository, eager_joinedload, sql_eq
 from middleware.assets.models.core.characters import Character, CharacterStat, CharacterCondition, CharacterKnowledge, CharacterSkill
 
 

@@ -1,8 +1,8 @@
 from typing import Sequence
 from sqlalchemy import select
 from middleware.db import Database
-from .base import BaseRepository, eager_joinedload, sql_eq
 from middleware.config import Result, ok, err, IOError_, NotFoundError
+from Backend.api.repository.core.base import BaseRepository, eager_joinedload, sql_eq
 from middleware.assets.models.core.items import Item, ItemArtillery, ItemArmor, ItemMisc, Inventory, InventoryItem
 
 class ItemArtilleryRepository(BaseRepository[ItemArtillery]):
@@ -19,6 +19,30 @@ class ItemMiscRepository(BaseRepository[ItemMisc]):
 
 class InventoryRepository(BaseRepository[Inventory]):
     model = Inventory
+
+    @classmethod
+    async def get_by_character(cls, character_id: int) -> Result[Inventory, NotFoundError | IOError_]:
+        try:
+            async with Database.get_async_session() as db:
+                result = await db.execute(
+                    select(Inventory)
+                    .options(eager_joinedload(Inventory.items))
+                    .where(sql_eq(Inventory.character_id, character_id))
+                )
+                entity = result.scalars().unique().first()
+                if entity is None:
+                    return err(NotFoundError(
+                        message="Inventory not found for character",
+                        entity="Inventory",
+                        identifier=character_id,
+                    ))
+                db.expunge(entity)
+                return ok(entity)
+        except Exception as exc:
+            return err(IOError_(
+                message="Failed to fetch Inventory by character",
+                target=str(exc),
+            ))
 
 
 class ItemRepository(BaseRepository[Item]):
@@ -66,30 +90,6 @@ class ItemRepository(BaseRepository[Item]):
         except Exception as exc:
             return err(IOError_(
                 message="Failed to fetch Items by category",
-                target=str(exc),
-            ))
-
-    @classmethod
-    async def get_by_character(cls, character_id: int) -> Result[Inventory, NotFoundError | IOError_]:
-        try:
-            async with Database.get_async_session() as db:
-                result = await db.execute(
-                    select(Inventory)
-                    .options(eager_joinedload(Inventory.items))
-                    .where(sql_eq(Inventory.character_id, character_id))
-                )
-                entity = result.scalars().unique().first()
-                if entity is None:
-                    return err(NotFoundError(
-                        message="Inventory not found for character",
-                        entity="Inventory",
-                        identifier=character_id,
-                    ))
-                db.expunge(entity)
-                return ok(entity)
-        except Exception as exc:
-            return err(IOError_(
-                message="Failed to fetch Inventory by character",
                 target=str(exc),
             ))
 

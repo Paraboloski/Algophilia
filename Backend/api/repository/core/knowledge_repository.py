@@ -1,4 +1,4 @@
-from .base import BaseRepository
+from Backend.api.repository.core.base import BaseRepository
 from middleware.assets.models.core.knowledges import Knowledge
 
 

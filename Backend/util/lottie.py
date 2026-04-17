@@ -1,7 +1,8 @@
 import re
-from .coin import CoinResult
-from .dice import DiceRollResult
-from typing import List, Dict, Any
+from typing import Dict, Any
+from Backend.util.coin import CoinResult
+from Backend.util.dice import DiceRollResult
+
 LOTTIE_ASSETS = {
     "dice": {
         4: "lottie/dice/d4.json",
@@ -15,14 +16,15 @@ LOTTIE_ASSETS = {
     "coin": "lottie/coin/flip.json"
 }
 
+
 def get_dice_ui_metadata(result: DiceRollResult) -> Dict[str, Any]:
     quantity = len(result["rolls"])
-    
+
     sides_match = re.search(r"d(\d+)", result["expression"])
     sides = int(sides_match.group(1)) if sides_match else 0
-    
+
     description = f"Lancio di {quantity} {'dado' if quantity == 1 else 'dadi'} da {sides}"
-    
+
     dice_details = []
     for val in result["rolls"]:
         dice_details.append({
@@ -30,15 +32,17 @@ def get_dice_ui_metadata(result: DiceRollResult) -> Dict[str, Any]:
             "value": val,
             "lottie_path": LOTTIE_ASSETS["dice"].get(sides, "lottie/dice/generic.json")
         })
-        
+
     bonus = result["bonus"]
     bonus_display = ""
-    if bonus != 0: bonus_display = f"{'+' if bonus > 0 else '-'} {abs(bonus)}"
+    if bonus != 0:
+        bonus_display = f"{'+' if bonus > 0 else '-'} {abs(bonus)}"
 
     rolls_str = " + ".join(map(str, result["rolls"]))
     formula = rolls_str
-    if bonus != 0: formula += f" {'+' if bonus > 0 else '-'} {abs(bonus)}"
-    
+    if bonus != 0:
+        formula += f" {'+' if bonus > 0 else '-'} {abs(bonus)}"
+
     return {
         "description": description,
         "dice": dice_details,
@@ -49,10 +53,11 @@ def get_dice_ui_metadata(result: DiceRollResult) -> Dict[str, Any]:
         "sides": sides
     }
 
+
 def get_coin_ui_metadata(result: CoinResult) -> Dict[str, Any]:
     return {
-        "description": "Lancio della moneta",
-        "result_text": result.value, # "Testa" o "Croce"
+        "description": "coin flip",
+        "result_text": result.value,
         "lottie_path": LOTTIE_ASSETS["coin"],
         "is_heads": result == CoinResult.HEADS
     }

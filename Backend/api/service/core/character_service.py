@@ -1,3 +1,4 @@
+from typing import cast
 from middleware.assets.models.core.items import Inventory
 from middleware.config import Result, IOError_, NotFoundError, ok
 from middleware.assets.models.core.characters import Character, CharacterCondition, CharacterKnowledge, CharacterSkill, CharacterStat
@@ -20,14 +21,14 @@ class CharacterService:
 
         created_char = char_res.unwrap()
 
-        new_inventory = Inventory(character_id=created_char.id)
+        new_inventory = Inventory(character_id=cast(int, created_char.id))
         await InventoryRepository.create(new_inventory)
 
         stats_res = await StatRepository.get_all()
         if stats_res.is_ok():
             stats = stats_res.unwrap()
             base_char_stats = []
-            for s in stats: base_char_stats.append(CharacterStat(character_id=created_char.id, stat_id=s.id))
+            for s in stats: base_char_stats.append(CharacterStat(character_id=cast(int, created_char.id), stat_id=cast(int, s.id)))
             if base_char_stats: await CharacterStatRepository.create_all(base_char_stats)
 
         return ok(created_char)

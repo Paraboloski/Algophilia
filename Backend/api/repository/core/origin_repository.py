@@ -1,10 +1,9 @@
 from typing import Sequence
 from sqlalchemy import select
 from middleware.db import Database
-from .base import BaseRepository, eager_joinedload, sql_eq
-from middleware.assets.models.core.origins import Origin, OriginKnowledge
 from middleware.config import Result, ok, err, IOError_, NotFoundError
-
+from middleware.assets.models.core.origins import Origin, OriginKnowledge
+from Backend.api.repository.core.base import BaseRepository, eager_joinedload, sql_eq
 
 class OriginRepository(BaseRepository[Origin]):
     model = Origin

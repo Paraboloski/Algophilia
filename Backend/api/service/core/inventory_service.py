@@ -1,4 +1,4 @@
-from typing import Sequence
+from typing import Sequence, cast
 from middleware.assets.models.core.items import Inventory, InventoryItem
 from middleware.config import Result, IOError_, NotFoundError, ok, err
 from Backend.api.repository import InventoryRepository, InventoryItemRepository, ItemRepository
@@ -26,7 +26,7 @@ class InventoryService:
         for idx_item in items:
             if idx_item.item_id == item_id:
                 new_quantity = idx_item.quantity + quantity
-                return await InventoryItemRepository.update(idx_item.id, {"quantity": new_quantity})
+                return await InventoryItemRepository.update(cast(int, idx_item.id), {"quantity": new_quantity})
 
         return await InventoryItemRepository.create(InventoryItem(inventory_id=inventory_id, item_id=item_id, quantity=quantity, equipped=False))
 
@@ -41,9 +41,9 @@ class InventoryService:
         for idx_item in items:
             if idx_item.item_id == item_id:
                 if idx_item.quantity <= quantity:
-                    return await InventoryItemRepository.delete(idx_item.id)
+                    return await InventoryItemRepository.delete(cast(int, idx_item.id))
                 else:
-                    update_res = await InventoryItemRepository.update(idx_item.id, {"quantity": idx_item.quantity - quantity})
+                    update_res = await InventoryItemRepository.update(cast(int, idx_item.id), {"quantity": idx_item.quantity - quantity})
                     if update_res.is_err(): return update_res # type: ignore
                     return ok(None)
 

@@ -1,6 +1,6 @@
-from .error import AppError
 from result import Result, Ok, Err
 from typing import TypeVar, NoReturn
+from middleware.config.core.error import AppError
 
 T = TypeVar("T")
 E = TypeVar("E", bound=AppError)

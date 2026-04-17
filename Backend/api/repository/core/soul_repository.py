@@ -1,14 +1,12 @@
 from typing import Sequence
 from sqlalchemy import select
 from middleware.db import Database
-from .base import BaseRepository, sql_eq
-from middleware.assets.models.core.souls import Soul, Trait
 from middleware.config import Result, ok, err, IOError_
-
+from middleware.assets.models.core.souls import Soul, Trait
+from Backend.api.repository.core.base import BaseRepository, sql_eq
 
 class TraitRepository(BaseRepository[Trait]):
     model = Trait
-
 
 class SoulRepository(BaseRepository[Soul]):
     model = Soul
