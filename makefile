@@ -4,9 +4,9 @@ ifneq (,$(wildcard ./.env))
 endif
 
 push:
-	@call .venv\Scripts\activate && cmd /c cmd\push.bat
+	@cmd /c cmd\push.bat
 
 dev:
-	@call .venv\Scripts\activate && cmd /c cmd\dev.bat
+	@cmd /c cmd\dev.bat
 
 .PHONY: push dev
