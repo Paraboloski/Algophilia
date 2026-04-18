@@ -4,7 +4,7 @@ import flet as ft
 from Frontend.src.app import App
 from middleware.db import Database
 from Backend.api.service import seed
-from middleware.config.core.logger import setup_logging
+from middleware.config import setup_logging, notify
 
 setup_logging()
 logger = logging.getLogger(__name__)
@@ -18,15 +18,18 @@ async def bootstrap() -> None:
         logger.info("Inizializzazione database...")
         init_result = await Database.init_db()
         if init_result.is_err():
+            err = init_result.unwrap_err() 
             logger.error("Errore DB: %s", init_result.unwrap_err())
+            await notify(f"Errore inizializzazione DB\n`{err}`")
             return
 
         logger.info("Avvio seed...")
         await seed.run_seed()
         logger.info("Bootstrap completato")
 
-    except Exception:
+    except Exception as e:
         logger.exception("Errore critico durante il bootstrap")
+        await notify(f"Errore critico nel bootstrap\n`{e}`", level="critical")
 
     finally:
         _ready.set()

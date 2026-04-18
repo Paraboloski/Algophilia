@@ -7,14 +7,17 @@ from contextlib import asynccontextmanager
 from middleware.config import ok, err, Result, IOError_
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 
+from middleware.config.core.env import get_env_bool
+
 class Database:
     DB_URL = get_env("DATABASE_URL").unwrap().replace("sqlite:///", "sqlite+aiosqlite:///")
+    IS_DEV = get_env_bool("IS_DEV").unwrap_or(False)
 
     engine = create_async_engine(
         DB_URL,
         connect_args={"check_same_thread": False},
         pool_pre_ping=True,
-        echo=True,
+        echo=IS_DEV,
     )
 
     SessionLocal = async_sessionmaker(

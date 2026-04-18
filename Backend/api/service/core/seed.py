@@ -5,6 +5,7 @@ from typing import Any
 from middleware.assets.templates import feats, spells, conditions
 from middleware.assets.models import Enhanced, Skill, SkillFeat, SkillSpell, SkillType, God, Condition
 from Backend.api.repository import EnhancedRepository, SkillRepository, SkillFeatRepository, SkillSpellRepository, ConditionRepository
+from middleware.config.core.notification import notify
 
 log = logging.getLogger(__name__)
 
@@ -229,5 +230,9 @@ async def run_seed() -> None:
     log.info("Condizioni → inserite: %d | saltate: %d | totali: %d", cond_ins, cond_skip, len(existing_condition_labels))
 
     log.info("Enhanced totali: %d", len(existing_enhanced_labels))
+    
+    total_inserted = feat_ins + spell_ins + cond_ins
+    total_skipped = feat_skip + spell_skip + cond_skip
+    if total_inserted == 0 and total_skipped == 0: await notify("⚠️ Seed completato ma nessun record inserito o saltato — verifica i template", level="warning")
 
     log.info("=== Seed completato con successo ===")

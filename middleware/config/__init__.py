@@ -51,4 +51,7 @@ __all__ = [
     "guard",
 ]
 
-__all__ += ["Result", "Ok", "Err"]
+from middleware.config.core.notification import notify
+from middleware.config.core.logger import setup_logging
+
+__all__ += ["Result", "Ok", "Err", "notify", "setup_logging"]
