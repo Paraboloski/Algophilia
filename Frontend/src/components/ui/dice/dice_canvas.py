@@ -1,8 +1,9 @@
 import flet as ft
 import flet.canvas as cv
 from typing import List, cast
+from Frontend.src.components.common import Container, Stack
 
-class DiceCanvas(ft.Container):
+class DiceCanvas(Container):
     POLYGONS: dict = {
         4:   [[50, 10], [90, 85], [10, 85]],
         6:   [[15, 15], [85, 15], [85, 85], [15, 85]],
@@ -26,8 +27,8 @@ class DiceCanvas(ft.Container):
     def __init__(
         self,
         sides: int,
-        top: int = 0,
-        left: int = 0,
+        top: int | float = 0,
+        left: int | float = 0,
         size: int = 70,
         scale: float = 0.0,
         rotate: float = 0.0,
@@ -35,7 +36,7 @@ class DiceCanvas(ft.Container):
     ):
         self._value_label = ft.Text(
             "?",
-            size=int(size * 0.3),  # Dynamic size
+            size=int(size * 0.3),  
             weight=ft.FontWeight.BOLD,
             color="white",
             text_align=ft.TextAlign.CENTER,
@@ -48,7 +49,7 @@ class DiceCanvas(ft.Container):
             size=size,
         )
 
-        label_wrapper = ft.Container(
+        label_wrapper = Container(
             content=self._value_label,
             width=size,
             height=size,
@@ -58,7 +59,7 @@ class DiceCanvas(ft.Container):
         )
 
         super().__init__(
-            content=ft.Stack(
+            content=Stack(
                 controls=cast(List[ft.Control], [canvas, label_wrapper]),
                 width=size,
                 height=size,

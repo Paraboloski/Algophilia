@@ -1,9 +1,9 @@
 import flet as ft
 from typing import Callable, List, cast
 from Frontend.src.components.ui import DiceSetRow, ColumnHeaders
-from Frontend.src.components.common import Label, FilledBtn, NumberField, StyledDivider
+from Frontend.src.components.common import Label, FilledBtn, NumberField, StyledDivider, Column, Row
 
-class DiceConfigPanel(ft.Column):
+class DiceConfigPanel(Column):
     MAX_ROWS = 4
  
     def __init__(
@@ -16,7 +16,7 @@ class DiceConfigPanel(ft.Column):
     ):
         self._on_roll = on_roll
  
-        self.rows_container = ft.Column(
+        self.rows_container = Column(
             spacing=5,
             animate_opacity=300,
             horizontal_alignment=ft.CrossAxisAlignment.CENTER,
@@ -43,7 +43,7 @@ class DiceConfigPanel(ft.Column):
                 StyledDivider(),
                 ColumnHeaders(),
                 self.rows_container,
-                ft.Row(
+                Row(
                     controls=cast(List[ft.Control], [self.roll_btn, self.bonus_field]),
                     alignment=ft.MainAxisAlignment.CENTER,
                     spacing=15,

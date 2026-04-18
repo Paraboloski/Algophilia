@@ -2,9 +2,9 @@ from __future__ import annotations
 
 import logging
 from typing import Any
-from middleware.assets.templates import feats, spells
-from middleware.assets.models.core.skills import Enhanced, Skill, SkillFeat, SkillSpell, SkillType, God
-from Backend.api.repository import EnhancedRepository, SkillRepository, SkillFeatRepository, SkillSpellRepository
+from middleware.assets.templates import feats, spells, conditions
+from middleware.assets.models import Enhanced, Skill, SkillFeat, SkillSpell, SkillType, God, Condition
+from Backend.api.repository import EnhancedRepository, SkillRepository, SkillFeatRepository, SkillSpellRepository, ConditionRepository
 
 log = logging.getLogger(__name__)
 
@@ -31,6 +31,19 @@ async def _load_existing_enhanced_labels() -> set[str]:
     labels = {e.label for e in enhanced_list}
 
     log.debug("Caricati %d enhanced esistenti", len(labels))
+
+    return labels
+
+async def _load_existing_condition_labels() -> set[str]:
+    result = await ConditionRepository.get_all()
+    if result.is_err():
+        log.error("Impossibile caricare le Condizioni esistenti: %s", result.unwrap_err())
+        return set()
+
+    condition_list = result.unwrap()
+    labels = {c.label for c in condition_list}
+
+    log.debug("Caricate %d condizioni esistenti", len(labels))
 
     return labels
 
@@ -161,6 +174,35 @@ async def _seed_spells(spells: list[dict[str, Any]], existing_skill_labels: set[
         
     return inserted, skipped
 
+async def _seed_conditions(conditions_list: list[dict[str, Any]], existing_labels: set[str]) -> tuple[int, int]:
+    inserted = 0
+    skipped = 0
+
+    for cond_data in conditions_list:
+        label: str = cond_data["label"]
+
+        if label in existing_labels:
+            log.debug("Condizione già presente, salto: %s", label)
+            skipped += 1
+            continue
+
+        cond = Condition(
+            label=label,
+            description=cond_data.get("description"),
+            is_afflicted=cond_data.get("is_afflicted", False)
+        )
+
+        result = await ConditionRepository.create(cond)
+        if result.is_err():
+            log.error("Impossibile creare Condizione '%s': %s", label, result.unwrap_err())
+            continue
+
+        existing_labels.add(label)
+        inserted += 1
+
+        log.debug("Condizione inserita: %s", label)
+
+    return inserted, skipped
 
 async def run_seed() -> None:
     log.info("=== Avvio procedura di seeding ===")
@@ -168,6 +210,7 @@ async def run_seed() -> None:
     existing_feat_labels = await _load_existing_skill_labels(SkillType.feat)
     existing_spell_labels = await _load_existing_skill_labels(SkillType.spell)
     existing_enhanced_labels = await _load_existing_enhanced_labels()
+    existing_condition_labels = await _load_existing_condition_labels()
 
     log.info(
         "Stato iniziale → feats: %d | spells: %d | enhanced: %d",
@@ -181,6 +224,9 @@ async def run_seed() -> None:
 
     spell_ins, spell_skip = await _seed_spells(spells, existing_spell_labels, existing_enhanced_labels)
     log.info("Incantesimi → inseriti: %d | saltati: %d | totali: %d", spell_ins, spell_skip, len(existing_spell_labels))
+    
+    cond_ins, cond_skip = await _seed_conditions(conditions, existing_condition_labels) # SEED CONDIZIONI
+    log.info("Condizioni → inserite: %d | saltate: %d | totali: %d", cond_ins, cond_skip, len(existing_condition_labels))
 
     log.info("Enhanced totali: %d", len(existing_enhanced_labels))
 

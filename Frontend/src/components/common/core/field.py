@@ -7,7 +7,7 @@ class NumberField(ft.TextField):
         label: str = "",
         value: str = "0",
         width: int = 80,
-        border_color: str = "#333333",
+        border_color: str = "white",
         focused_border_color: str = "#FFD700",
         text_align: ft.TextAlign = ft.TextAlign.CENTER,
         disabled: bool = False,

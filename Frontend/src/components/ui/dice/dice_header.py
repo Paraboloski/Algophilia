@@ -1,8 +1,8 @@
 import flet as ft
 from typing import List, cast
-from Frontend.src.components.common import Label
+from Frontend.src.components.common import Label, Row, Container
 
-class ColumnHeaders(ft.Row):
+class ColumnHeaders(Row):
     def __init__(
         self,
         qty_label: str = "QTÀ",
@@ -30,7 +30,7 @@ class ColumnHeaders(ft.Row):
                     width=sides_width,
                     text_align=ft.TextAlign.CENTER,
                 ),
-                ft.Container(width=spacer_width),
+                Container(width=spacer_width),
             ]),
             alignment=ft.MainAxisAlignment.CENTER,
             spacing=10,

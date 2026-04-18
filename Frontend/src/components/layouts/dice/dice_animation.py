@@ -2,10 +2,11 @@ import random
 import flet as ft
 from typing import List, Tuple
 from Frontend.src.components.ui import DiceCanvas
+from Frontend.src.components.common import Stack
 
 _DiceEntry = Tuple[DiceCanvas, int, int]
  
-class DiceAnimationArea(ft.Stack):
+class DiceAnimationArea(Stack):
     def __init__(
         self,
         width: int = 350,
@@ -35,13 +36,16 @@ class DiceAnimationArea(ft.Stack):
         drop_y = 100
         margin = 10
         
-        cols = max(1, (self.width - margin) // dice_size)
-        rows = max(1, (self.height - drop_y - margin) // dice_size)
+        w = self.width if self.width is not None else 350
+        h = self.height if self.height is not None else 250
+        
+        cols = int(max(1, (w - margin) // dice_size))
+        rows = int(max(1, (h - drop_y - margin) // dice_size))
         
         positions = []
         for r in range(rows):
             for c in range(cols):
-                x = c * dice_size + (self.width - cols * dice_size) / 2
+                x = c * dice_size + (w - cols * dice_size) / 2
                 y = r * dice_size + 5 
                 positions.append((x, y))
         
@@ -51,15 +55,15 @@ class DiceAnimationArea(ft.Stack):
             if i < len(positions):
                 left, top = positions[i]
             else:
-                left = random.uniform(0, self.width - dice_size)
-                top = random.uniform(0, self.height - drop_y - dice_size)
+                left = random.uniform(0, w - dice_size)
+                top = random.uniform(0, h - drop_y - dice_size)
             
             jitter = dice_size * 0.15
             left += random.uniform(-jitter, jitter)
             top += random.uniform(-jitter, jitter)
             
-            left = max(2, min(left, self.width - dice_size - 2))
-            top = max(2, min(top, self.height - drop_y - dice_size - 2))
+            left = max(2, min(left, w - dice_size - 2))
+            top = max(2, min(top, h - drop_y - dice_size - 2))
 
             canvas = DiceCanvas(
                 sides=sides,

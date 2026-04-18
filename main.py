@@ -6,8 +6,11 @@ from middleware.db import Database
 from Backend.api.service import seed
 from middleware.config.core.logger import setup_logging
 
+setup_logging()
 logger = logging.getLogger(__name__)
-_listener = setup_logging()
+
+_ready = asyncio.Event()
+_bootstrap_task: asyncio.Task | None = None
 
 
 async def bootstrap() -> None:
@@ -18,20 +21,23 @@ async def bootstrap() -> None:
             logger.error("Errore DB: %s", init_result.unwrap_err())
             return
 
-        logger.info("Avvio seed dati...")
+        logger.info("Avvio seed...")
         await seed.run_seed()
         logger.info("Bootstrap completato")
 
     except Exception:
         logger.exception("Errore critico durante il bootstrap")
+
     finally:
-        _listener.stop()
+        _ready.set()
 
 
-async def main(page: ft.Page):
-    app = App(page)
-    app.run()
+async def main(page: ft.Page) -> None:
+    global _bootstrap_task
+    if _bootstrap_task is None:
+        _bootstrap_task = asyncio.create_task(bootstrap())
+    await _ready.wait()
+    App(page).run()
 
-    asyncio.create_task(bootstrap())
 
 ft.run(main, assets_dir="frontend/assets")

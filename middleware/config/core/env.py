@@ -50,8 +50,8 @@ def get_env_float(key: str) -> Result[float, AppError]:
 
 
 def get_env_bool(key: str) -> Result[bool, AppError]:
-    TRUE = {"true", "1", "yes"}
-    FALSE = {"false", "0", "no"}
+    TRUE = {"true", "1", "yes", "on", "y", "t"}
+    FALSE = {"false", "0", "no", "off", "n", "f"}
 
     def parse(raw: str) -> bool:
         val = raw.strip().lower()
