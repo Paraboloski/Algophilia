@@ -31,9 +31,7 @@ class DiceRoller(ft.Container):
             expand=True,
         )
  
-        self.content = ft.Stack(
-            controls=cast(List[ft.Control], [main_layout, self.result_overlay])
-        )
+        self.content = ft.Stack(controls=cast(List[ft.Control], [main_layout, self.result_overlay]))
         self.update()
  
     async def roll_action(self, _e) -> None:

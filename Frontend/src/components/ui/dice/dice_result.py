@@ -6,7 +6,6 @@ class ResultOverlay(ft.Container):
     def __init__(
         self,
         on_exit: Optional[Callable] = None,
-        label_result: str = "RISULTATO",
         label_continue: str = "TOCCA PER CHIUDERE",
         bgcolor: str = "rgba(24, 24, 24, 0.7)",
         blur_sigma: float = 5.0,
@@ -25,12 +24,6 @@ class ResultOverlay(ft.Container):
         super().__init__(
             content=ft.Column(
                 controls=cast(List[ft.Control], [
-                    Label(
-                        value=label_result,
-                        size=12,
-                        weight=ft.FontWeight.BOLD,
-                        color=accent_color,
-                    ),
                     self._total_text,
                     ft.Container(height=20),
                     Label(

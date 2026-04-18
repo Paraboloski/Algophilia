@@ -35,7 +35,7 @@ class DiceCanvas(ft.Container):
     ):
         self._value_label = ft.Text(
             "?",
-            size=18,
+            size=int(size * 0.3),  # Dynamic size
             weight=ft.FontWeight.BOLD,
             color="white",
             text_align=ft.TextAlign.CENTER,

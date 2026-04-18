@@ -24,5 +24,27 @@ class NumberField(ft.TextField):
             keyboard_type=ft.KeyboardType.NUMBER,
             disabled=disabled,
             hint_text=hint_text,
+            on_focus=self._handle_focus,
+            on_change=self._handle_change,
             **kwargs,
         )
+
+    def _handle_focus(self, e):
+        self.selection = ft.TextSelection(0, len(str(self.value)))
+        self.update()
+
+    def _handle_change(self, e):
+        val = self.value
+        if not val:
+            self.value = "0"
+        elif len(val) > 1 and val.startswith("0"):
+            self.value = val.lstrip("0")
+            if not self.value:
+                self.value = "0"
+        try:
+            if int(self.value) > 999:
+                self.value = "999"
+        except ValueError:
+            pass
+
+        self.update()

@@ -5,5 +5,4 @@ from Frontend.src.components.common.core.filledBtn import FilledBtn
 from Frontend.src.components.common.core.divider import StyledDivider
 
 
-
 __all__ = ["Label", "IconBtn", "NumberField", "FilledBtn", "StyledDivider"]

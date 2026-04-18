@@ -24,11 +24,48 @@ class DiceAnimationArea(ft.Stack):
  
     def populate(self, rolls: List[Tuple[int, int]]) -> None:
         self.clear()
-        for val, sides in rolls:
+        if not rolls: return
+
+        count = len(rolls)
+        dice_size = 70
+        if count > 12: dice_size = 55
+        if count > 20: dice_size = 45
+        if count > 35: dice_size = 35
+
+        drop_y = 100
+        margin = 10
+        
+        cols = max(1, (self.width - margin) // dice_size)
+        rows = max(1, (self.height - drop_y - margin) // dice_size)
+        
+        positions = []
+        for r in range(rows):
+            for c in range(cols):
+                x = c * dice_size + (self.width - cols * dice_size) / 2
+                y = r * dice_size + 5 
+                positions.append((x, y))
+        
+        random.shuffle(positions)
+
+        for i, (val, sides) in enumerate(rolls):
+            if i < len(positions):
+                left, top = positions[i]
+            else:
+                left = random.uniform(0, self.width - dice_size)
+                top = random.uniform(0, self.height - drop_y - dice_size)
+            
+            jitter = dice_size * 0.15
+            left += random.uniform(-jitter, jitter)
+            top += random.uniform(-jitter, jitter)
+            
+            left = max(2, min(left, self.width - dice_size - 2))
+            top = max(2, min(top, self.height - drop_y - dice_size - 2))
+
             canvas = DiceCanvas(
                 sides=sides,
-                top=random.randint(0, 50),
-                left=random.randint(40, 240),
+                top=top,
+                left=left,
+                size=dice_size,
                 scale=0.0,
             )
             self.controls.append(canvas)
@@ -39,7 +76,7 @@ class DiceAnimationArea(ft.Stack):
         for canvas, _, _ in self._entries:
             canvas.scale = 1.0
             canvas.top = (canvas.top or 0) + 100
-            canvas.rotate = random.uniform(-0.5, 0.5)
+            canvas.rotate = random.uniform(-0.3, 0.3)
         update_fn()
         
         for _ in range(self._shuffle_frames):

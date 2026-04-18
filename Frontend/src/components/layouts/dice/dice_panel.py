@@ -66,11 +66,9 @@ class DiceConfigPanel(ft.Column):
  
     def add_row(self, _e=None) -> None:
         count = len(self.rows_container.controls)
-        if count >= self.MAX_ROWS:
-            return
+        if count >= self.MAX_ROWS: return
  
-        for row in cast(List[DiceSetRow], self.rows_container.controls):
-            row.set_add_visible(False)
+        for row in cast(List[DiceSetRow], self.rows_container.controls):  row.set_add_visible(False)
  
         new_row = DiceSetRow(
             on_delete=self.remove_row,

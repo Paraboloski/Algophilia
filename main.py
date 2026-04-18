@@ -1,10 +1,10 @@
 import logging
 import asyncio
 import flet as ft
+from Frontend.src.app import App
 from middleware.db import Database
 from Backend.api.service import seed
 from middleware.config.core.logger import setup_logging
-from Frontend.src.views import DiceRoller
 
 logger = logging.getLogger(__name__)
 _listener = setup_logging()
@@ -28,18 +28,10 @@ async def bootstrap() -> None:
         _listener.stop()
 
 
-async def main(page: ft.Page) -> None:
-    page.title = "Algophilia"
-    page.bgcolor = "#181818"
-    page.padding = 0
-    page.theme_mode = ft.ThemeMode.DARK
-    page.fonts = {"Cinzel": "fonts/Cinzel-Regular.ttf"}
-    page.theme = ft.Theme(font_family="Cinzel")
-
-    page.add(DiceRoller())
-    page.update()
+async def main(page: ft.Page):
+    app = App(page)
+    app.run()
 
     asyncio.create_task(bootstrap())
-
 
 ft.run(main, assets_dir="frontend/assets")

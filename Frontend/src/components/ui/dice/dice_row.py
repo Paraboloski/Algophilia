@@ -1,6 +1,6 @@
 import flet as ft
 from typing import Callable, List, cast
-from Frontend.src.components.common import IconBtn
+from Frontend.src.components.common import IconBtn, NumberField
 
 
 class DiceSetRow(ft.Row):
@@ -23,11 +23,9 @@ class DiceSetRow(ft.Row):
         self.spacing = 10
         self.alignment = ft.MainAxisAlignment.CENTER
 
-        self.qty_dropdown = ft.Dropdown(
+        self.qty_field = NumberField(
             value=default_qty,
             width=110,
-            options=[ft.DropdownOption(v) for v in self.QTY_OPTIONS],
-            text_style=ft.TextStyle(size=16, weight=ft.FontWeight.BOLD),
         )
 
         self.sides_dropdown = ft.Dropdown(
@@ -43,6 +41,7 @@ class DiceSetRow(ft.Row):
             icon_size=28,
             on_click=lambda _: self.on_add(None),
             visible=show_add,
+            width=40,
         )
 
         self.delete_btn = IconBtn(
@@ -50,15 +49,25 @@ class DiceSetRow(ft.Row):
             icon_color="#BDBDBD",
             icon_size=24,
             on_click=lambda _: self.on_delete(self),
+            width=40,
         )
 
         self.controls = cast(
             List[ft.Control],
-            [self.qty_dropdown, self.sides_dropdown, self.add_btn, self.delete_btn],
+            [
+                self.qty_field,
+                self.sides_dropdown,
+                ft.Row(
+                    controls=[self.add_btn, self.delete_btn],
+                    width=80,
+                    spacing=0,
+                    alignment=ft.MainAxisAlignment.CENTER,
+                ),
+            ],
         )
 
     @property
-    def qty(self) -> int: return int(self.qty_dropdown.value or "1")
+    def qty(self) -> int: return int(self.qty_field.value or "1")
 
     @property
     def sides(self) -> int: return int(self.sides_dropdown.value or "20")

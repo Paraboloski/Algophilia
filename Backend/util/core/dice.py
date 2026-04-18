@@ -11,9 +11,7 @@ class DiceRollResult(TypedDict):
     bonus: int
 
 
-def roll_single(sides: int) -> int:
-    return random.randint(1, sides)
-
+def roll_single(sides: int) -> int: return random.randint(1, sides)
 
 def parse_dice_expression(expression: str) -> Result[Tuple[int, int, int], ParseError]:
     clean_expr = expression.replace(" ", "").lower()
@@ -84,6 +82,6 @@ def roll(quantity: int, sides: int, bonus: int = 0) -> Result[DiceRollResult, Va
 
 def roll_dice(expression: str) -> Result[DiceRollResult, ParseError | ValidationError]:
     parsed = parse_dice_expression(expression)
-    if isinstance(parsed, Err):return parsed
+    if isinstance(parsed, Err): return parsed
     quantity, sides, bonus = parsed.unwrap()
     return roll(quantity, sides, bonus)
