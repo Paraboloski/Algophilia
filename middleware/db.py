@@ -4,10 +4,9 @@ from sqlmodel import SQLModel
 from typing import AsyncGenerator
 from middleware.config import get_env
 from contextlib import asynccontextmanager
+from middleware.config.core.env import get_env_bool
 from middleware.config import ok, err, Result, IOError_
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
-
-from middleware.config.core.env import get_env_bool
 
 class Database:
     DB_URL = get_env("DATABASE_URL").unwrap().replace("sqlite:///", "sqlite+aiosqlite:///")
