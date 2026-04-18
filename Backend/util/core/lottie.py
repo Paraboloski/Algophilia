@@ -1,7 +1,7 @@
 import re
 from typing import Dict, Any
-from Backend.util.coin import CoinResult
-from Backend.util.dice import DiceRollResult
+from Backend.util.core.coin import CoinResult
+from Backend.util.core.dice import DiceRollResult
 
 LOTTIE_ASSETS = {
     "dice": {

@@ -4,15 +4,9 @@ ifneq (,$(wildcard ./.env))
 endif
 
 push:
-	@cmd\push.bat
+	@call .venv\Scripts\activate && cmd /c cmd\push.bat
 
-dev-pc:
-	@cmd\dev_win.bat
+dev:
+	@call .venv\Scripts\activate && cmd /c cmd\dev.bat
 
-dev-apk:
-	@cmd\dev_apk.bat
-
-main:
-	@.venv\Scripts\python main.py
-
-.PHONY: push dev-apk dev-pc main
+.PHONY: push dev

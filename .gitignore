@@ -4,6 +4,7 @@ dist/
 build/
 .venv/
 .flet/
+.vscode/
 __pycache__/
 
 

@@ -1,3 +1,3 @@
-from Frontend.src.views import dice 
+from Frontend.src.views.core.dice import DiceRoller
 
-__all__ = ["dice"]
+__all__ = ["DiceRoller"]
