@@ -1,7 +1,7 @@
 import flet as ft
 import flet.canvas as cv
 from typing import List, cast
-from view.components import Container, Stack
+from src.view.components.common import Container, Stack
 
 class DiceCanvas(Container):
     POLYGONS: dict = {

@@ -1,6 +1,7 @@
 import flet as ft
 from typing import Callable, List, cast
-from src.view.components import DiceSetRow, ColumnHeaders, Label, FilledBtn, NumberField, StyledDivider, Column, Row
+from src.view.components import DiceSetRow, ColumnHeaders
+from src.view.components.common import Label, FilledBtn, NumberField, StyledDivider, Column, Row
 
 class DiceConfigPanel(Column):
     MAX_ROWS = 4

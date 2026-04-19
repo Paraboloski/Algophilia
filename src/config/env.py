@@ -4,21 +4,23 @@ import os
 from result import Result
 from typing import Callable, TypeVar
 from dotenv import load_dotenv, find_dotenv
-from src.config import err, ok, AppError, ParseError, ValidationError
+from src.config.options import err, ok, attempt
+from src.config.error import AppError, ParseError, ValidationError
 
 load_dotenv(find_dotenv())
 
 T = TypeVar("T")
 
 def _safe_cast(key: str, raw: str, cast: Callable[[str], T], type: str) -> Result[T, AppError]:
-    try:
-        return ok(cast(raw))
-    except Exception:
-        return err(ParseError(
+    return attempt(
+        cast,
+        lambda _: ParseError(
             message=f"Environment variable '{key}' could not be parsed as {type}",
             default=raw,
             type=type,
-        ))
+        ),
+        raw
+    )
 
 
 def get_env(key: str) -> Result[str, AppError]:
@@ -52,12 +54,16 @@ def get_env_bool(key: str) -> Result[bool, AppError]:
     TRUE = {"true", "1", "yes", "on", "y", "t"}
     FALSE = {"false", "0", "no", "off", "n", "f"}
 
-    def parse(raw: str) -> bool:
+    def parse(raw: str) -> Result[bool, AppError]:
         val = raw.strip().lower()
         if val in TRUE:
-            return True
+            return ok(True)
         if val in FALSE:
-            return False
-        raise ValueError(f"Cannot parse {raw!r} as bool")
+            return ok(False)
+        return err(ParseError(
+            message=f"Cannot parse {raw!r} as bool",
+            default=raw,
+            type="bool"
+        ))
 
-    return get_env_as(key, parse, "bool")
+    return get_env(key).and_then(parse)

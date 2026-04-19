@@ -4,6 +4,8 @@ import flet as ft
 from src.view.app import App
 from src.data import Database
 from src.api.service import seed
+from src.config.env import get_env_int
+from src.config import attempt_async, AppError
 from src.middleware import setup_logging, notify
 
 setup_logging()
@@ -14,25 +16,29 @@ _bootstrap_task: asyncio.Task | None = None
 
 
 async def bootstrap() -> None:
-    try:
+    async def _run():
         logger.info("Inizializzazione database...")
-        init_result = await Database.init_db()
-        if init_result.is_err():
-            err = init_result.unwrap_err() 
-            logger.error("Errore DB: %s", init_result.unwrap_err())
-            await notify(f"Errore inizializzazione DB\n`{err}`")
-            return
+        db_res = await Database.init_db()
+        if db_res.is_err():
+            return db_res
 
         logger.info("Avvio seed...")
         await seed.run_seed()
+        
         logger.info("Bootstrap completato")
+        return db_res
 
-    except Exception as e:
-        logger.exception("Errore critico durante il bootstrap")
-        await notify(f"Errore critico nel bootstrap\n`{e}`", level="critical")
+    res = await attempt_async(
+        _run(),
+        lambda e: AppError(message=f"Critical bootstrap error: {e}")
+    )
 
-    finally:
-        _ready.set()
+    if res.is_err():
+        error = res.unwrap_err()
+        logger.error("Bootstrap Fail: %s", error)
+        await notify(f"Errore critico bootstrap\n`{error}`", level="critical")
+    
+    _ready.set()
 
 
 async def main(page: ft.Page) -> None:
@@ -43,4 +49,5 @@ async def main(page: ft.Page) -> None:
     App(page).run()
 
 
-ft.run(main, assets_dir="frontend/assets")
+if __name__ == "__main__":
+    ft.run(main, assets_dir="frontend/assets")

@@ -1,9 +1,10 @@
-from data.mysql.db import Database
+from src.data.mysql.db import Database
 from result import Result
 from typing import Sequence
 from sqlalchemy import select
-from src.config import ok, err, IOError_, NotFoundError
-from src.data import BaseRepository, eager_joinedload, sql_eq, Character, CharacterStat, CharacterCondition, CharacterKnowledge, CharacterSkill
+from src.config import ok, err, IOError_, NotFoundError, attempt_async
+from src.data.repository.base import BaseRepository, eager_joinedload, sql_eq
+from src.data.models.characters import Character, CharacterStat, CharacterCondition, CharacterKnowledge, CharacterSkill
 
 
 class CharacterRepository(BaseRepository[Character]):
@@ -11,8 +12,8 @@ class CharacterRepository(BaseRepository[Character]):
 
     @classmethod
     async def get_full(cls, character_id: int) -> Result[Character, NotFoundError | IOError_]:
-        try:
-            async with Database.get_async_session() as db:
+        async def _run():
+            async with Database._get_async_session() as db:
                 result = await db.execute(
                     select(Character)
                     .options(
@@ -27,19 +28,23 @@ class CharacterRepository(BaseRepository[Character]):
                     .where(sql_eq(Character.id, character_id))
                 )
                 entity = result.scalars().unique().first()
-                if entity is None:
-                    return err(NotFoundError(
-                        message="Character not found",
-                        entity="Character",
-                        identifier=character_id,
-                    ))
-                db.expunge(entity)
-                return ok(entity)
-        except Exception as exc:
-            return err(IOError_(
-                message="Failed to fetch full Character",
-                target=str(exc),
+                if entity is not None:
+                    db.expunge(entity)
+                return entity
+
+        res = await attempt_async(
+            _run(),
+            lambda e: IOError_(message="Failed to fetch full Character", target=str(e))
+        )
+
+        return res.and_then(lambda entity:
+            ok(entity) if entity is not None else
+            err(NotFoundError(
+                message="Character not found",
+                entity="Character",
+                identifier=character_id,
             ))
+        )
 
 
 class CharacterStatRepository(BaseRepository[CharacterStat]):
@@ -47,47 +52,56 @@ class CharacterStatRepository(BaseRepository[CharacterStat]):
 
     @classmethod
     async def get_by_composite_id(cls, character_id: int, stat_id: int) -> Result[CharacterStat, NotFoundError | IOError_]:
-        try:
-            async with Database.get_async_session() as db:
+        async def _run():
+            async with Database._get_async_session() as db:
                 entity = await db.get(CharacterStat, (character_id, stat_id))
-                if entity is None:
-                    return err(NotFoundError(
-                        message="CharacterStat not found",
-                        entity="CharacterStat",
-                        identifier=(character_id, stat_id),
-                    ))
-                db.expunge(entity)
-                return ok(entity)
-        except Exception as exc:
-            return err(IOError_(
-                message="Failed to fetch CharacterStat",
-                target=str(exc),
+                if entity is not None:
+                    db.expunge(entity)
+                return entity
+
+        res = await attempt_async(
+            _run(),
+            lambda e: IOError_(message="Failed to fetch CharacterStat", target=str(e))
+        )
+
+        return res.and_then(lambda entity:
+            ok(entity) if entity is not None else
+            err(NotFoundError(
+                message="CharacterStat not found",
+                entity="CharacterStat",
+                identifier=(character_id, stat_id),
             ))
+        )
 
     @classmethod
     async def delete_by_composite_id(cls, character_id: int, stat_id: int) -> Result[None, NotFoundError | IOError_]:
-        try:
-            async with Database.get_async_session() as db:
+        async def _run():
+            async with Database._get_async_session() as db:
                 entity = await db.get(CharacterStat, (character_id, stat_id))
                 if entity is None:
-                    return err(NotFoundError(
-                        message="CharacterStat not found",
-                        entity="CharacterStat",
-                        identifier=(character_id, stat_id),
-                    ))
+                    return False
                 await db.delete(entity)
                 await db.commit()
-                return ok(None)
-        except Exception as exc:
-            return err(IOError_(
-                message="Failed to delete CharacterStat",
-                target=str(exc),
+                return True
+
+        res = await attempt_async(
+            _run(),
+            lambda e: IOError_(message="Failed to delete CharacterStat", target=str(e))
+        )
+
+        return res.and_then(lambda deleted:
+            ok(None) if deleted else
+            err(NotFoundError(
+                message="CharacterStat not found",
+                entity="CharacterStat",
+                identifier=(character_id, stat_id),
             ))
+        )
 
     @classmethod
     async def get_by_character(cls, character_id: int) -> Result[Sequence[CharacterStat], IOError_]:
-        try:
-            async with Database.get_async_session() as db:
+        async def _run():
+            async with Database._get_async_session() as db:
                 result = await db.execute(
                     select(CharacterStat)
                     .where(sql_eq(CharacterStat.character_id, character_id))
@@ -95,12 +109,12 @@ class CharacterStatRepository(BaseRepository[CharacterStat]):
                 entities = result.scalars().all()
                 for e in entities:
                     db.expunge(e)
-                return ok(entities)
-        except Exception as exc:
-            return err(IOError_(
-                message="Failed to list CharacterStats",
-                target=str(exc),
-            ))
+                return entities
+
+        return await attempt_async(
+            _run(),
+            lambda e: IOError_(message="Failed to list CharacterStats", target=str(e))
+        )
 
 
 class CharacterConditionRepository(BaseRepository[CharacterCondition]):
@@ -108,48 +122,56 @@ class CharacterConditionRepository(BaseRepository[CharacterCondition]):
     
     @classmethod
     async def get_by_composite_id(cls, character_id: int, condition_id: int) -> Result[CharacterCondition, NotFoundError | IOError_]:
-        try:
-            async with Database.get_async_session() as db:
-                entity = await db.get(CharacterCondition,
-                                (character_id, condition_id))
-                if entity is None:
-                    return err(NotFoundError(
-                        message="CharacterCondition not found",
-                        entity="CharacterCondition",
-                        identifier=(character_id, condition_id),
-                    ))
-                db.expunge(entity)
-                return ok(entity)
-        except Exception as exc:
-            return err(IOError_(
-                message="Failed to fetch CharacterCondition",
-                target=str(exc),
+        async def _run():
+            async with Database._get_async_session() as db:
+                entity = await db.get(CharacterCondition, (character_id, condition_id))
+                if entity is not None:
+                    db.expunge(entity)
+                return entity
+
+        res = await attempt_async(
+            _run(),
+            lambda e: IOError_(message="Failed to fetch CharacterCondition", target=str(e))
+        )
+
+        return res.and_then(lambda entity:
+            ok(entity) if entity is not None else
+            err(NotFoundError(
+                message="CharacterCondition not found",
+                entity="CharacterCondition",
+                identifier=(character_id, condition_id),
             ))
+        )
 
     @classmethod
     async def delete_by_composite_id(cls, character_id: int, condition_id: int) -> Result[None, NotFoundError | IOError_]:
-        try:
-            async with Database.get_async_session() as db:
+        async def _run():
+            async with Database._get_async_session() as db:
                 entity = await db.get(CharacterCondition, (character_id, condition_id))
                 if entity is None:
-                    return err(NotFoundError(
-                        message="CharacterCondition not found",
-                        entity="CharacterCondition",
-                        identifier=(character_id, condition_id),
-                    ))
+                    return False
                 await db.delete(entity)
                 await db.commit()
-                return ok(None)
-        except Exception as exc:
-            return err(IOError_(
-                message="Failed to delete CharacterCondition",
-                target=str(exc),
+                return True
+
+        res = await attempt_async(
+            _run(),
+            lambda e: IOError_(message="Failed to delete CharacterCondition", target=str(e))
+        )
+
+        return res.and_then(lambda deleted:
+            ok(None) if deleted else
+            err(NotFoundError(
+                message="CharacterCondition not found",
+                entity="CharacterCondition",
+                identifier=(character_id, condition_id),
             ))
+        )
 
     @classmethod
     async def get_by_character(cls, character_id: int) -> Result[Sequence[CharacterCondition], IOError_]:
-        try:
-            async with Database.get_async_session() as db:
+        async def _run():
+            async with Database._get_async_session() as db:
                 result = await db.execute(
                     select(CharacterCondition)
                     .where(sql_eq(CharacterCondition.character_id, character_id))
@@ -157,12 +179,12 @@ class CharacterConditionRepository(BaseRepository[CharacterCondition]):
                 entities = result.scalars().all()
                 for e in entities:
                     db.expunge(e)
-                return ok(entities)
-        except Exception as exc:
-            return err(IOError_(
-                message="Failed to list CharacterConditions",
-                target=str(exc),
-            ))
+                return entities
+
+        return await attempt_async(
+            _run(),
+            lambda e: IOError_(message="Failed to list CharacterConditions", target=str(e))
+        )
 
 
 class CharacterKnowledgeRepository(BaseRepository[CharacterKnowledge]):
@@ -170,49 +192,56 @@ class CharacterKnowledgeRepository(BaseRepository[CharacterKnowledge]):
 
     @classmethod
     async def get_by_composite_id(cls, character_id: int, knowledge_id: int) -> Result[CharacterKnowledge, NotFoundError | IOError_]:
-        try:
-            async with Database.get_async_session() as db:
-                entity = await db.get(CharacterKnowledge,
-                                (character_id, knowledge_id))
-                if entity is None:
-                    return err(NotFoundError(
-                        message="CharacterKnowledge not found",
-                        entity="CharacterKnowledge",
-                        identifier=(character_id, knowledge_id),
-                    ))
-                db.expunge(entity)
-                return ok(entity)
-        except Exception as exc:
-            return err(IOError_(
-                message="Failed to fetch CharacterKnowledge",
-                target=str(exc),
+        async def _run():
+            async with Database._get_async_session() as db:
+                entity = await db.get(CharacterKnowledge, (character_id, knowledge_id))
+                if entity is not None:
+                    db.expunge(entity)
+                return entity
+
+        res = await attempt_async(
+            _run(),
+            lambda e: IOError_(message="Failed to fetch CharacterKnowledge", target=str(e))
+        )
+
+        return res.and_then(lambda entity:
+            ok(entity) if entity is not None else
+            err(NotFoundError(
+                message="CharacterKnowledge not found",
+                entity="CharacterKnowledge",
+                identifier=(character_id, knowledge_id),
             ))
+        )
 
     @classmethod
     async def delete_by_composite_id(cls, character_id: int, knowledge_id: int) -> Result[None, NotFoundError | IOError_]:
-        try:
-            async with Database.get_async_session() as db:
-                entity = await db.get(CharacterKnowledge,
-                                (character_id, knowledge_id))
+        async def _run():
+            async with Database._get_async_session() as db:
+                entity = await db.get(CharacterKnowledge, (character_id, knowledge_id))
                 if entity is None:
-                    return err(NotFoundError(
-                        message="CharacterKnowledge not found",
-                        entity="CharacterKnowledge",
-                        identifier=(character_id, knowledge_id),
-                    ))
+                    return False
                 await db.delete(entity)
                 await db.commit()
-                return ok(None)
-        except Exception as exc:
-            return err(IOError_(
-                message="Failed to delete CharacterKnowledge",
-                target=str(exc),
+                return True
+
+        res = await attempt_async(
+            _run(),
+            lambda e: IOError_(message="Failed to delete CharacterKnowledge", target=str(e))
+        )
+
+        return res.and_then(lambda deleted:
+            ok(None) if deleted else
+            err(NotFoundError(
+                message="CharacterKnowledge not found",
+                entity="CharacterKnowledge",
+                identifier=(character_id, knowledge_id),
             ))
+        )
 
     @classmethod
     async def get_by_character(cls, character_id: int) -> Result[Sequence[CharacterKnowledge], IOError_]:
-        try:
-            async with Database.get_async_session() as db:
+        async def _run():
+            async with Database._get_async_session() as db:
                 result = await db.execute(
                     select(CharacterKnowledge)
                     .where(sql_eq(CharacterKnowledge.character_id, character_id))
@@ -220,12 +249,12 @@ class CharacterKnowledgeRepository(BaseRepository[CharacterKnowledge]):
                 entities = result.scalars().all()
                 for e in entities:
                     db.expunge(e)
-                return ok(entities)
-        except Exception as exc:
-            return err(IOError_(
-                message="Failed to list CharacterKnowledges",
-                target=str(exc),
-            ))
+                return entities
+
+        return await attempt_async(
+            _run(),
+            lambda e: IOError_(message="Failed to list CharacterKnowledges", target=str(e))
+        )
 
 
 class CharacterSkillRepository(BaseRepository[CharacterSkill]):
@@ -233,47 +262,56 @@ class CharacterSkillRepository(BaseRepository[CharacterSkill]):
 
     @classmethod
     async def get_by_composite_id(cls, character_id: int, skill_id: int) -> Result[CharacterSkill, NotFoundError | IOError_]:
-        try:
-            async with Database.get_async_session() as db:
+        async def _run():
+            async with Database._get_async_session() as db:
                 entity = await db.get(CharacterSkill, (character_id, skill_id))
-                if entity is None:
-                    return err(NotFoundError(
-                        message="CharacterSkill not found",
-                        entity="CharacterSkill",
-                        identifier=(character_id, skill_id),
-                    ))
-                db.expunge(entity)
-                return ok(entity)
-        except Exception as exc:
-            return err(IOError_(
-                message="Failed to fetch CharacterSkill",
-                target=str(exc),
+                if entity is not None:
+                    db.expunge(entity)
+                return entity
+
+        res = await attempt_async(
+            _run(),
+            lambda e: IOError_(message="Failed to fetch CharacterSkill", target=str(e))
+        )
+
+        return res.and_then(lambda entity:
+            ok(entity) if entity is not None else
+            err(NotFoundError(
+                message="CharacterSkill not found",
+                entity="CharacterSkill",
+                identifier=(character_id, skill_id),
             ))
+        )
 
     @classmethod
     async def delete_by_composite_id(cls, character_id: int, skill_id: int) -> Result[None, NotFoundError | IOError_]:
-        try:
-            async with Database.get_async_session() as db:
+        async def _run():
+            async with Database._get_async_session() as db:
                 entity = await db.get(CharacterSkill, (character_id, skill_id))
                 if entity is None:
-                    return err(NotFoundError(
-                        message="CharacterSkill not found",
-                        entity="CharacterSkill",
-                        identifier=(character_id, skill_id),
-                    ))
+                    return False
                 await db.delete(entity)
                 await db.commit()
-                return ok(None)
-        except Exception as exc:
-            return err(IOError_(
-                message="Failed to delete CharacterSkill",
-                target=str(exc),
+                return True
+
+        res = await attempt_async(
+            _run(),
+            lambda e: IOError_(message="Failed to delete CharacterSkill", target=str(e))
+        )
+
+        return res.and_then(lambda deleted:
+            ok(None) if deleted else
+            err(NotFoundError(
+                message="CharacterSkill not found",
+                entity="CharacterSkill",
+                identifier=(character_id, skill_id),
             ))
+        )
 
     @classmethod
     async def get_by_character(cls, character_id: int) -> Result[Sequence[CharacterSkill], IOError_]:
-        try:
-            async with Database.get_async_session() as db:
+        async def _run():
+            async with Database._get_async_session() as db:
                 result = await db.execute(
                     select(CharacterSkill)
                     .where(sql_eq(CharacterSkill.character_id, character_id))
@@ -281,9 +319,9 @@ class CharacterSkillRepository(BaseRepository[CharacterSkill]):
                 entities = result.scalars().all()
                 for e in entities:
                     db.expunge(e)
-                return ok(entities)
-        except Exception as exc:
-            return err(IOError_(
-                message="Failed to list CharacterSkills",
-                target=str(exc),
-            ))
+                return entities
+
+        return await attempt_async(
+            _run(),
+            lambda e: IOError_(message="Failed to list CharacterSkills", target=str(e))
+        )

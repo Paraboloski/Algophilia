@@ -74,7 +74,7 @@ async def _seed_feats(feats: list[dict[str, Any]], existing_labels: set[str]) ->
     skipped = 0
 
     for feat_data in feats:
-        label: str = feat_data["name"]
+        label: str = feat_data["label"]
 
         if label in existing_labels:
             log.debug("Talento già presente, salto: %s", label)
@@ -117,7 +117,7 @@ async def _seed_spells(spells: list[dict[str, Any]], existing_skill_labels: set[
     skipped = 0
 
     for spell_data in spells:
-        label: str = spell_data["name"]
+        label: str = spell_data["label"]
 
         if label in existing_skill_labels:
             log.debug("Incantesimo già presente, salto: %s", label)
@@ -130,7 +130,7 @@ async def _seed_spells(spells: list[dict[str, Any]], existing_skill_labels: set[
         if enhancements:
             enh_data = enhancements[0]
             enhanced = await _get_or_create_enhanced(
-                label=enh_data["name"],
+                label=enh_data["label"],
                 description=enh_data.get("description"),
                 existing_labels=existing_enhanced_labels,
             )
@@ -151,7 +151,7 @@ async def _seed_spells(spells: list[dict[str, Any]], existing_skill_labels: set[
             log.error("Impossibile recuperare l'ID per la Skill '%s'", label)
             continue
 
-        god_value: God = spell_data["god"]
+        god_value: God = spell_data["affinity_with"]
         affinity_level: int | None = spell_data.get("affinity_level")
 
         skill_spell = SkillSpell(

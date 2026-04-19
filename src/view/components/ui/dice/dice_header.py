@@ -1,6 +1,6 @@
 import flet as ft
 from typing import List, cast
-from Frontend.src.components.common import Label, Row, Container
+from src.view.components.common import Label, Row, Container
 
 class ColumnHeaders(Row):
     def __init__(

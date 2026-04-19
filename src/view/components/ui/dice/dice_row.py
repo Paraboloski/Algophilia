@@ -1,6 +1,6 @@
 import flet as ft
 from typing import Callable, List, cast
-from Frontend.src.components.common import IconBtn, Dropdown, Row
+from src.view.components.common import IconBtn, Dropdown, Row
 
 
 class DiceSetRow(Row):

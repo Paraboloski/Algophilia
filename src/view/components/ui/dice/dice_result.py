@@ -1,6 +1,6 @@
 import flet as ft
 from typing import Callable, List, cast, Optional
-from Frontend.src.components.common import Label, Container
+from src.view.components.common import Label, Container
 
 class ResultOverlay(Container):
     def __init__(

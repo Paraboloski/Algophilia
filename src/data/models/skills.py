@@ -19,6 +19,7 @@ class Enhanced(SQLModel, table=True):
 
     id: int | None = Field(default=None, primary_key=True)
     label: str = Field(sa_column=Column(String(100)))
+    affinity_required: int | None = Field(default=None)
     description: str | None = Field(default=None, sa_column=Column(Text))
 
     spells: list["SkillSpell"] = Relationship(back_populates="enhanced_effect")

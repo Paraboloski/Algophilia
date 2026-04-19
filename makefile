@@ -6,7 +6,10 @@ endif
 push:
 	@cmd /c cmd\push.bat
 
-dev:
-	@cmd /c cmd\dev.bat
+web:
+	@cmd /c cmd\web.bat
 
-.PHONY: push dev
+android:
+	@cmd /c cmd\android.bat
+
+.PHONY: push web android

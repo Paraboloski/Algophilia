@@ -2,10 +2,12 @@ from __future__ import annotations
 
 from result import Result
 from sqlmodel import SQLModel
-from typing import AsyncGenerator
 from contextlib import asynccontextmanager 
-from src.config import ok, err, IOError_, get_env,get_env_bool
+from typing import TypeVar, Any, AsyncGenerator, Callable, Coroutine
+from src.config import IOError_, get_env, get_env_bool, attempt_async
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
+
+T = TypeVar("T")
 
 class Database:
     DB_URL = get_env("DATABASE_URL").unwrap().replace("sqlite:///", "sqlite+aiosqlite:///")
@@ -27,7 +29,7 @@ class Database:
 
     @classmethod
     @asynccontextmanager
-    async def get_async_session(cls) -> AsyncGenerator[AsyncSession, None]:
+    async def _get_async_session(cls) -> AsyncGenerator[AsyncSession, None]:
         async with cls.SessionLocal() as db:
             try:
                 yield db
@@ -36,12 +38,23 @@ class Database:
                 raise
 
     @classmethod
+    async def session_scope(cls, func: Callable[[AsyncSession], Coroutine[Any, Any, T]]) -> Result[T, IOError_]:
+        async def _run():
+            async with cls._get_async_session() as db:
+                return await func(db)
+
+        return await attempt_async(
+            _run(),
+            lambda e: IOError_(message="Database session error", target=str(e))
+        )
+
+    @classmethod
     async def init_db(cls) -> Result[None, IOError_]:
-        try:
-            async with cls.engine.begin() as conn: await conn.run_sync(SQLModel.metadata.create_all)
-            return ok(None)
-        except Exception as e:
-            return err(IOError_(
-                message="DB init Fail",
-                target=str(e),
-            ))
+        async def _run():
+            async with cls.engine.begin() as conn:
+                await conn.run_sync(SQLModel.metadata.create_all)
+
+        return await attempt_async(
+            _run(),
+            lambda e: IOError_(message="DB init Fail", target=str(e))
+        )

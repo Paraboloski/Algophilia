@@ -1,7 +1,7 @@
 from result import Result
 from src.config import IOError_, NotFoundError
 from typing import Generic, TypeVar, Type, Sequence
-from Backend.api.repository.core.base import BaseRepository
+from src.data.repository.base import BaseRepository
 
 T = TypeVar("T")
 R = TypeVar("R", bound=BaseRepository)

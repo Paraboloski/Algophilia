@@ -1,6 +1,7 @@
 import random
 from typing import List, Tuple
-from src.view.components import Stack, DiceCanvas
+from src.view.components.common import Stack
+from src.view.components import DiceCanvas
 
 _DiceEntry = Tuple[DiceCanvas, int, int]
  

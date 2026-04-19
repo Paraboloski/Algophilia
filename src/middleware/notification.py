@@ -1,6 +1,7 @@
 import httpx
 import logging
-from src.config.env import get_env
+from result import Result
+from src.config import ok, err, AppError, IOError_, get_env, get_env_bool, attempt_async
 
 logger = logging.getLogger(__name__)
 
@@ -9,15 +10,15 @@ _CHAT_ID = get_env("TELEGRAM_CHAT_ID").unwrap_or("")
 _BASE_URL = f"https://api.telegram.org/bot{_TOKEN}/sendMessage"
 
 
-async def notify(message: str, level: str = "error") -> None:
+async def notify(message: str, level: str = "error") -> Result[None, AppError]:
     if not _TOKEN or not _CHAT_ID:
         logger.warning("Telegram non configurato, notifica saltata")
-        return
+        return ok(None)
 
     icons = {"info": "ℹ️", "warning": "⚠️", "error": "🚨", "critical": "🔥"}
     icon = icons.get(level, "🔔")
 
-    try:
+    async def _send():
         async with httpx.AsyncClient(timeout=5) as client:
             response = await client.post(
                 _BASE_URL,
@@ -28,5 +29,14 @@ async def notify(message: str, level: str = "error") -> None:
                 },
             )
             response.raise_for_status()
-    except httpx.HTTPError as e:
-        logger.error("Errore invio notifica Telegram: %s", e)
+            return None
+
+    res = await attempt_async(
+        _send(),
+        lambda e: IOError_(message="Failed to send Telegram notification", target=str(e))
+    )
+    
+    if res.is_err():
+        logger.error("Errore invio notifica Telegram: %s", res.unwrap_err())
+    
+    return res

@@ -1,5 +1,6 @@
 import flet as ft
 from typing import Optional
+from src.config import attempt
 
 class NumberField(ft.TextField):
     def __init__(
@@ -41,10 +42,10 @@ class NumberField(ft.TextField):
             self.value = val.lstrip("0")
             if not self.value:
                 self.value = "0"
+        
         try:
-            if int(self.value) > 999:
-                self.value = "999"
+            if int(self.value) > 999: self.value = "999"
         except ValueError:
-            pass
+            pass 
 
         self.update()
