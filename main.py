@@ -1,10 +1,10 @@
 import logging
 import asyncio
 import flet as ft
-from Frontend.src.app import App
-from middleware.db import Database
-from Backend.api.service import seed
-from middleware.config import setup_logging, notify
+from src.view.app import App
+from src.data import Database
+from src.api.service import seed
+from src.middleware import setup_logging, notify
 
 setup_logging()
 logger = logging.getLogger(__name__)
