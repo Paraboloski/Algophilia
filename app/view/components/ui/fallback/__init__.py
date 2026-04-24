@@ -1,0 +1,7 @@
+from app.view.components.ui.fallback.page import Page
+from app.view.components.ui.fallback.content import Content
+
+__all__ =  [
+    "Page",
+    "Content"
+]

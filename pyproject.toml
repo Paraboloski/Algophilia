@@ -1,0 +1,13 @@
+[project]
+name = "algophilia"
+version = "0.1.0"
+description = "A"
+readme = ""
+requires-python = ">=3.14"
+dependencies = [
+    "aiosqlite>=0.22.1",
+    "flet>=0.84.0",
+    "pydantic>=2.13.3",
+    "pyyaml>=6.0.3",
+    "sqlalchemy>=2.0.49",
+]

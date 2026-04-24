@@ -1,0 +1,15 @@
+# static_skill.yaml
+feats:
+  - key: ""
+    name: ""
+    description: ""
+
+spells:
+  - key: ""
+    name: ""
+    description: ""
+    required_affinity_level: 1
+    affinity_with_god: ""
+    enhanced_effect:
+      effect: ""
+      affinity_level_required: 2

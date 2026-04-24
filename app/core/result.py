@@ -1,0 +1,78 @@
+from __future__ import annotations
+from dataclasses import dataclass
+from typing import TypeVar, Callable, Generic, Union, Never, cast
+
+T = TypeVar("T")
+U = TypeVar("U")
+
+
+class Monad(Generic[T]):
+    def bind(self, function: Callable[[T], Monad[U]]) -> Monad[U]:
+        raise NotImplementedError
+
+    def map(self, function: Callable[[T], U]) -> Monad[U]:
+        return self.bind(lambda x: Ok(function(x)))
+
+    def unwrap(self) -> T:
+        raise NotImplementedError
+
+    def is_ok(self) -> bool:
+        raise NotImplementedError
+
+    def unwrap_or(self, default: T) -> T:
+        raise NotImplementedError
+
+
+@dataclass(frozen=True)
+class Ok(Monad[T]):
+    value: T
+
+    def bind(self, function: Callable[[T], Monad[U]]) -> Monad[U]:
+        try:
+            return function(self.value)
+        except Exception as e:
+            return cast(Monad[U], Err(e))
+
+    def unwrap(self) -> T:
+        return self.value
+
+    def is_ok(self) -> bool:
+        return True
+
+    def unwrap_or(self, default: T) -> T:
+        return self.value
+
+    def __repr__(self) -> str:
+        return f"Ok({self.value!r})"
+
+
+@dataclass(frozen=True)
+class Err(Monad[Never]):
+    error: Exception
+
+    def bind(self, function: Callable) -> Monad[Never]:
+        return self
+
+    def unwrap(self) -> Never:
+        raise self.error
+
+    def is_ok(self) -> bool:
+        return False
+
+    def unwrap_or(self, default: U) -> U:
+        return default
+
+    def __repr__(self) -> str:
+        return f"Err({self.error!r})"
+
+
+Result = Union[Ok[T], Err]
+
+
+def result(function: Callable[..., T]) -> Callable[..., Result[T]]:
+    def wrapper(*args, **kwargs) -> Result[T]:
+        try:
+            return Ok(function(*args, **kwargs))
+        except Exception as e:
+            return Err(e)
+    return wrapper
