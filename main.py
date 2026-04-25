@@ -5,16 +5,16 @@ from app.data.database import Database
 from app.core.exception import AppError
 from app.data.seeder import seed_database
 from app.services.registry import load_all
-from app.config import logger, Log, LoggingLevel, settings, Panic
-from app.view.components.ui.toast import ToastLevel, ToastManager
+from app.config import logger, settings, Panic
+from app.view.components.ui.toast import ToastManager
+from app.notification import ToastNotifier, TelegramNotifier
 
 logger.init(Path(__file__).parent)
 
-_LEVEL_MAP = {
-    LoggingLevel.INFO:    ToastLevel.INFO,
-    LoggingLevel.WARNING: ToastLevel.WARNING,
-    LoggingLevel.ERROR:   ToastLevel.ERROR,
-}
+logger.subscribe(TelegramNotifier(
+    token=settings.TELEGRAM_TOKEN,
+    id=settings.TELEGRAM_CHAT_ID
+).on_log)
 
 class AppContext:
     def __init__(self, page: ft.Page):
@@ -39,16 +39,11 @@ async def init_app() -> Database:
 
     return db
 
+
 def main(page: ft.Page) -> None:
     ctx = AppContext(page)
-
-    def _on_log(log: Log) -> None:
-        toast_level = _LEVEL_MAP.get(log.level)
-        if toast_level is None:
-            return
-        ctx.toast.show(log.message, toast_level)
-
-    logger.subscribe(_on_log)
+    toast_notifier = ToastNotifier(ctx.toast)
+    logger.subscribe(toast_notifier.on_log)
 
     async def start() -> None:
         try:
@@ -59,7 +54,14 @@ def main(page: ft.Page) -> None:
             logger.error(f"init NOT OK: {str(e)}")
 
     page.run_task(start)
-    page.on_close = lambda _: logger.shutdown()
+
+    def close(_):
+        logger.unsubscribe(toast_notifier.on_log)
+        logger.shutdown()
+
+    page.on_close = close
+
 
 if __name__ == "__main__":
     ft.run(main, assets_dir="app/assets")
+

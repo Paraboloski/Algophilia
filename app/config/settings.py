@@ -58,5 +58,8 @@ class Settings:
         _db_url.unwrap().replace("sqlite:///", "")
     )
 
+    TELEGRAM_TOKEN = _env.string("TELEGRAM_TOKEN").map(lambda x: x).unwrap()
+    TELEGRAM_CHAT_ID = _env.string("TELEGRAM_CHAT_ID").map(lambda x: x).unwrap()
+
 
 settings = Settings()

@@ -26,6 +26,9 @@ class Ok(Generic[T]):
     def is_ok(self) -> bool:
         return True
 
+    def unwrap_or(self, default: T) -> T:
+        return self.value
+
     def __repr__(self) -> str:
         return f"Ok({self.value!r})"
 
@@ -45,6 +48,9 @@ class Err(Generic[E]):
 
     def is_ok(self) -> bool:
         return False
+
+    def unwrap_or(self, default: T) -> T:
+        return default
 
     def __repr__(self) -> str:
         return f"Err({self.error!r})"
