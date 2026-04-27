@@ -3,7 +3,11 @@ ifneq (,$(wildcard ./.env))
 	export
 endif
 
-.PHONY: android
+.PHONY: main android
+
+main:
+	@uv sync
+	@uv run main.py
 
 android:
 	@uv sync

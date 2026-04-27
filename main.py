@@ -1,4 +1,5 @@
 import sys
+import traceback
 import flet as ft
 from app.view.app import App
 from app.config import Container
@@ -21,23 +22,22 @@ async def bootstrap(container: Container) -> Result:
     return Ok(True)
 
 async def main(page: ft.Page):
-    container = Container()
-    
-    def cleanup():
-        container.worker().shutdown()
-        container.logger()._directory._rmdir()
-
-    page.on_disconnect = lambda _: cleanup()
-    page.on_close = lambda _: cleanup()
-
     try:
+        container = Container()
+        
+        def cleanup():
+            container.worker().shutdown()
+            container.logger()._directory._rmdir()
+
+        page.on_disconnect = lambda _: cleanup()
+        page.on_close = lambda _: cleanup()
+
         await bootstrap(container)
         app = App(page, container)
         await app.build()
-    except AppError:
-        sys.exit(1)
-        import traceback
+    except AppError as e:
         traceback.print_exc()
+        sys.exit(1)
 
 if __name__ == "__main__":
     ft.run(

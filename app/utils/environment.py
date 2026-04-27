@@ -1,5 +1,4 @@
 import os
-import sys
 from dotenv import find_dotenv, load_dotenv
 from app.middleware import EnvError, Err, Ok, result_wrap
 
@@ -22,6 +21,6 @@ class Environment:
         result = self.get_env(key)
 
         if isinstance(result, Err):
-            sys.exit(1)
+            raise result.error
 
         return result.value
