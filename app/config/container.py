@@ -1,4 +1,4 @@
-from app.utils import Dir
+from app.utils import Directory
 from app.config.settings import settings
 from app.data import Repository, Database  
 from app.events import Telegram, Logger, Worker
@@ -9,7 +9,7 @@ class DependencyInjectorContainer(containers.DeclarativeContainer):
 
     logger = providers.Singleton(
         Logger,
-        directory=Dir(settings._log_dir),
+        directory=Directory(settings._log_dir),
         worker=worker,
     )
 

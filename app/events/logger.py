@@ -1,13 +1,13 @@
 import os
 import inspect
-from app.utils import Dir
+from app.utils import Directory
 from app.models import Log, LogLevel
 from app.events.worker import Worker
 from typing import Any, Callable, Optional
 
 
 class Logger:
-    def __init__(self, directory: Dir, worker: Worker):
+    def __init__(self, directory: Directory, worker: Worker):
         self._worker = worker
         self._directory = directory
         self._worker.subscribe(self._write)
