@@ -6,6 +6,7 @@ from dotenv import find_dotenv, load_dotenv
 if os.getenv("ENV") != "PRODUCTION":
     load_dotenv(find_dotenv())
 
+
 class Environment:
     def get_env(self, key: str) -> Result[str, EnvError]:
         value = os.getenv(key)
@@ -19,6 +20,6 @@ class Environment:
         result = self.get_env(key)
 
         if isinstance(result, Err):
-            raise result.unwrap()
+            raise result.unwrap_err()
 
         return result.value

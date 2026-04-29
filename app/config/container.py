@@ -1,8 +1,9 @@
 from app.utils import Directory
 from app.config.settings import settings
-from app.data import Repository, Database  
+from app.data import Repository, Database
 from app.events import Telegram, Logger, Worker
 from dependency_injector import containers, providers
+
 
 class DependencyInjectorContainer(containers.DeclarativeContainer):
     worker = providers.Singleton(Worker)
@@ -29,6 +30,6 @@ class DependencyInjectorContainer(containers.DeclarativeContainer):
 
     repository = providers.Singleton(
         Repository,
-        db=database, 
+        db=database,
         logger=logger,
     )

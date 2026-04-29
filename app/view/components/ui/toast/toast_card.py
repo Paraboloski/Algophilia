@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import time
+import asyncio
+import threading
 import flet as ft
 from typing import Callable
 from app.view.style import settings
@@ -8,7 +10,13 @@ from app.view.components.ui.toast.toast import Toast
 from app.view.components.common import Icon, Label, Title
 from app.view.components.ui.toast.toast_classes import CLASSES
 
-def ToastCard(toast: Toast, page: ft.Page, on_dismiss: Callable[[str], None]) -> ft.Container:
+
+def ToastCard(
+    toast: Toast,
+    page: ft.Page,
+    on_dismiss: Callable[[str], None],
+    dismiss_event: threading.Event,
+) -> ft.Container:
     theme = CLASSES[toast.level]
     duration = theme.duration
 
@@ -53,15 +61,13 @@ def ToastCard(toast: Toast, page: ft.Page, on_dismiss: Callable[[str], None]) ->
         )
     )
 
-    border = ft.Colors.with_opacity(0.08, ft.Colors.WHITE)
-
-    progress_bar = ft.Container(
-        bgcolor=theme.border_color,
-        height=2,
+    progress_bar = ft.ProgressBar(
+        value=1.0,
+        bar_height=2,
+        color=theme.border_color,
+        bgcolor=ft.Colors.TRANSPARENT,
+        border_radius=0,
         expand=True,
-        offset=ft.Offset(0, 0),
-        animate_offset=ft.Animation(
-            int(duration * 1000), ft.AnimationCurve.LINEAR) if duration else None,
     )
 
     content = ft.Stack(
@@ -88,12 +94,13 @@ def ToastCard(toast: Toast, page: ft.Page, on_dismiss: Callable[[str], None]) ->
                 bottom=0,
                 bgcolor=theme.border_color,
             ),
-            ft.Container(content=ft.Row(
-                controls=[progress_bar],
-                spacing=0,
-                height=2,
+            ft.Container(
+                content=progress_bar,
+                bottom=0,
+                left=0,
+                right=0,
                 visible=duration is not None,
-            ), bottom=0, left=0, right=0),
+            ),
         ]
     )
 
@@ -101,12 +108,13 @@ def ToastCard(toast: Toast, page: ft.Page, on_dismiss: Callable[[str], None]) ->
         content=content,
         bgcolor=settings._main_colors["bg_dark"],
         border_radius=12,
-        border=ft.border.all(1, border),
+        border=ft.border.all(1, ft.Colors.with_opacity(0.08, ft.Colors.WHITE)),
         clip_behavior=ft.ClipBehavior.ANTI_ALIAS,
         shadow=ft.BoxShadow(
             blur_radius=20,
             spread_radius=-5,
-            color=ft.Colors.with_opacity(0.4, "#000000"),
+            color=ft.Colors.with_opacity(
+                0.4, settings._main_colors["bg_dark"]),
             offset=ft.Offset(0, 8),
         ),
         offset=ft.Offset(0, -0.4),
@@ -127,28 +135,41 @@ def ToastCard(toast: Toast, page: ft.Page, on_dismiss: Callable[[str], None]) ->
         _drag_x[0] = 0.0
 
         if abs(velocity) > 400 or abs(distance) > 64:
-            card.offset = ft.Offset(-1 if (distance < 0 or velocity < 0) else 1, 0)
+            card.offset = ft.Offset(-1 if (distance <
+                                    0 or velocity < 0) else 1, 0)
             card.update()
             time.sleep(0.15)
             on_dismiss(tid)
         else:
             card.offset = ft.Offset(0, 0)
-            try:
-                card.update()
-            except:
-                pass
+            card.update()
 
-    def start_animations():
-        time.sleep(0.05)
-        try:
-            card.offset = ft.Offset(0, 0)
-            if duration is not None:
-                progress_bar.offset = ft.Offset(-1, 0)
-            page.update()
-        except:
-            pass
+    async def start_animations() -> None:
+        await asyncio.sleep(0.05)
+        if dismiss_event.is_set():
+            return
 
-    page.run_thread(start_animations)
+        card.offset = ft.Offset(0, 0)
+        page.update()
+
+    page.run_task(start_animations)
+
+    if duration is not None:
+        async def animate_progress() -> None:
+            start = time.perf_counter()
+
+            while not dismiss_event.is_set():
+                elapsed = time.perf_counter() - start
+                remaining = max(0.0, 1.0 - (elapsed / float(duration)))
+
+                if remaining <= 0:
+                    break
+
+                progress_bar.value = remaining
+                page.update()
+                await asyncio.sleep(0.05)
+
+        page.run_task(animate_progress)
 
     return ft.Container(
         data=toast.id,

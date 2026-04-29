@@ -5,6 +5,7 @@ from app.models import Log, LogLevel
 from requests.exceptions import RequestException
 from app.utils.exception import AppError, TelegramError
 
+
 class Telegram:
     def __init__(self, token: str, chat_id: str):
         self._token = token
@@ -25,7 +26,7 @@ class Telegram:
             response = requests.post(self._base_url, json=payload, timeout=5)
             if not response.ok:
                 exception = TelegramError(
-                    action="invio log", 
+                    action="invio log",
                     details=f"Status: {response.status_code} - {response.text}"
                 )
                 return Err(exception)

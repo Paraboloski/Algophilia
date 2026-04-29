@@ -46,3 +46,6 @@ class Logger:
 
     def subscribe(self, f: Callable[[Log], Any]):
         self._worker.subscribe(f)
+
+    def unsubscribe(self, f: Callable[[Log], Any]):
+        self._worker.unsubscribe(f)

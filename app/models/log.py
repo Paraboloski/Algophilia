@@ -3,11 +3,13 @@ from datetime import datetime
 from enum import Enum as _Enum
 from dataclasses import dataclass, field
 
+
 class Level(str, _Enum):
     INFO = "info"
     ERROR = "error"
     DEBUG = "debug"
     WARNING = "warning"
+
 
 @dataclass(frozen=True)
 class Log:

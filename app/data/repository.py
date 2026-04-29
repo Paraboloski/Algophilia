@@ -14,7 +14,7 @@ class Repository:
         response = self._database.get_connection()
         if response.is_err():
             return Err(response.unwrap_err())
-        
+
         conn = response.unwrap()
 
         try:
@@ -22,7 +22,7 @@ class Repository:
             await conn.execute(query, params)
             await conn.commit()
             return Ok(True)
-            
+
         except Error as e:
             exception = QueryError(query=query, details=str(e))
             self._logger.error(str(exception))
@@ -40,7 +40,7 @@ class Repository:
                 for query, params in queries:
                     self._logger.debug(f"SQL: {query} | Params: {params}")
                     await cursor.execute(query, params)
-            
+
             await conn.commit()
             return Ok(True)
 

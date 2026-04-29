@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 from typing import Optional
-from sqlalchemy import JSON  
+from sqlalchemy import JSON
 from app.models.base import Base, PydanticType
-from sqlalchemy.orm import Mapped, mapped_column  
-from pydantic import BaseModel, ConfigDict, field_validator, model_validator 
+from sqlalchemy.orm import Mapped, mapped_column
+from pydantic import BaseModel, ConfigDict, field_validator, model_validator
 
 
 class SoulTrait(BaseModel):
@@ -25,7 +25,6 @@ class EnhancedEffect(BaseModel):
 class GodAffinity(BaseModel):
     god_key:        str
     affinity_level: int = 0
-    
 
 
 class InventorySlot(BaseModel):
@@ -33,7 +32,6 @@ class InventorySlot(BaseModel):
     quantity: int = 1
 
 
-   
 class BodyParts(BaseModel):
     head:      bool = False
     torso:     bool = False
@@ -60,13 +58,15 @@ class CharacterStats(BaseModel):
 
     hunger_current: int = 0
     hunger_maximum: int = 4
-    
+
     model_config = ConfigDict(frozen=True)
 
     @model_validator(mode="after")
     def current_not_higher_than_max(self) -> "CharacterStats":
-        object.__setattr__(self, "current_hp", min(self.current_hp, self.health_points))
-        object.__setattr__(self, "current_mp", min(self.current_mp, self.mind_points))
+        object.__setattr__(self, "current_hp", min(
+            self.current_hp, self.health_points))
+        object.__setattr__(self, "current_mp", min(
+            self.current_mp, self.mind_points))
         return self
 
     @property
@@ -125,12 +125,13 @@ class CharacterSpell(BaseModel):
 
     model_config = ConfigDict(frozen=True)
 
+
 class CharacterSkills(BaseModel):
     feat_keys:           list[str] = []
     unlocked_spells:     list[CharacterSpell] = []
     god_affinities:      list[GodAffinity] = []
     knowledges:          list[CharacterKnowledge] = []
-    
+
 
 class CharacterInventory(BaseModel):
     weapon_left:  Optional[str] = None
@@ -175,25 +176,29 @@ class CharacterInfo(BaseModel):
     model_config = ConfigDict(frozen=True)
 
 
-
 class Character(Base):
     __tablename__ = "characters"
 
     level: Mapped[int] = mapped_column(default=1)
-    
+
     conditions: Mapped[list[str]] = mapped_column("conditions", JSON)
-    
+
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    
-    info: Mapped[CharacterInfo] = mapped_column("info", PydanticType(CharacterInfo))
-    
-    body_parts: Mapped[BodyParts] = mapped_column("body_parts", PydanticType(BodyParts))
-    
-    stats: Mapped[CharacterStats] = mapped_column("stats", PydanticType(CharacterStats))
-    
-    skills: Mapped[CharacterSkills] = mapped_column("skills", PydanticType(CharacterSkills))
-    
-    inventory: Mapped[CharacterInventory] = mapped_column("inventory", PydanticType(CharacterInventory))
+
+    info: Mapped[CharacterInfo] = mapped_column(
+        "info", PydanticType(CharacterInfo))
+
+    body_parts: Mapped[BodyParts] = mapped_column(
+        "body_parts", PydanticType(BodyParts))
+
+    stats: Mapped[CharacterStats] = mapped_column(
+        "stats", PydanticType(CharacterStats))
+
+    skills: Mapped[CharacterSkills] = mapped_column(
+        "skills", PydanticType(CharacterSkills))
+
+    inventory: Mapped[CharacterInventory] = mapped_column(
+        "inventory", PydanticType(CharacterInventory))
 
     @property
     def health_points(self) -> int:

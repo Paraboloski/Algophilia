@@ -6,11 +6,12 @@ from app.events.logger import Logger
 from aiosqlite import Error, Connection
 from app.utils.exception import AppError, QueryError
 
+
 class Seeder:
-    def __init__(self, conn: Connection, tables: dict[str, Path], logger: Logger) -> None:
+    def __init__(self, connection: Connection, tables: dict[str, Path], logger: Logger) -> None:
         self._tables = tables
         self._logger = logger
-        self._connection = conn
+        self._connection = connection
 
     def _open(self, path: Path) -> list[dict]:
         with open(path, "r", encoding="utf-8") as file:
@@ -23,7 +24,7 @@ class Seeder:
 
         for table, path in self._tables.items():
             rows = self._open(path)
-            
+
             if not rows:
                 self._logger.warn(f"Seeder: {table} è vuoto o mancante")
                 continue
@@ -42,14 +43,16 @@ class Seeder:
 
                     self._logger.debug(f"SQL Seed: {query}")
                     await self._connection.execute(query, params)
-                    
+
                     table_count += 1
-                
+
                 except Error as e:
-                    self._logger.error(f"Seeder: Errore SQLite nella tabella {table}: {e}")
+                    self._logger.error(
+                        f"Seeder: Errore SQLite nella tabella {table}: {e}")
                     total_skipped += 1
 
-            self._logger.info(f"Seeder: {table} -> {table_count} righe elaborate")
+            self._logger.debug(
+                f"Seeder: {table} -> {table_count} righe elaborate")
             total_inserted += table_count
 
         try:
@@ -57,5 +60,6 @@ class Seeder:
         except Error as e:
             return Err(QueryError(query="COMMIT Seeder", details=str(e)))
 
-        self._logger.info(f"Seed completato: {total_inserted} inseriti, {total_skipped} saltati")
+        self._logger.debug(
+            f"Seed completato: {total_inserted} inseriti, {total_skipped} saltati")
         return Ok(True)

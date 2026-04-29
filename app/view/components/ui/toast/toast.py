@@ -5,6 +5,7 @@ from typing import Optional
 from dataclasses import dataclass
 from app.view.components.ui.toast.toast_classes import Level
 
+
 @dataclass
 class Toast:
     id:      str

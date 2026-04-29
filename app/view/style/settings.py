@@ -31,14 +31,16 @@ _MAIN_FONTS = {
     "cinzel_extrabold": Path("fonts") / "Cinzel-ExtraBold.ttf",
 }
 
+
 class Settings:
-    def __init__ (self):
-        self._main_width = 402
-        self._main_height = 874
+    def __init__(self):
+        self._main_width = 360
+        self._main_height = 800
         self._app_name = "Algophilia"
         self._main_fonts = _MAIN_FONTS
         self._main_icons = _MAIN_ICONS
         self._main_colors = _MAIN_COLORS
         self._main_images = _MAIN_IMAGES
-        
+
+
 settings = Settings()

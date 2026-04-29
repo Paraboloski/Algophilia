@@ -6,17 +6,24 @@ from typing import Any, Callable, Optional
 
 class Worker:
     def __init__(self):
+        self._is_shutdown = False
+        self._shutdown_lock = threading.Lock()
+        self._subscribers_lock = threading.Lock()
         self._queue: Queue[Optional[Log]] = Queue()
         self._subscribers: list[Callable[[Log], None]] = []
-        self._shutdown_lock = threading.Lock()
-        self._is_shutdown = False
 
         self._thread = threading.Thread(
             target=self._process_queue, daemon=True)
         self._thread.start()
 
     def subscribe(self, callback: Callable[[Log], Any]):
-        self._subscribers.append(callback)
+        with self._subscribers_lock:
+            self._subscribers.append(callback)
+
+    def unsubscribe(self, callback: Callable[[Log], Any]):
+        with self._subscribers_lock:
+            self._subscribers = [
+                sub for sub in self._subscribers if sub != callback]
 
     def dispatch(self, log: Log):
         if self._is_shutdown:
@@ -31,7 +38,10 @@ class Worker:
                 self._queue.task_done()
                 break
 
-            for sub in self._subscribers:
+            with self._subscribers_lock:
+                subscribers = list(self._subscribers)
+
+            for sub in subscribers:
                 threading.Thread(target=sub, args=(log,), daemon=True).start()
 
             self._queue.task_done()

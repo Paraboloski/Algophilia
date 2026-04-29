@@ -1,33 +1,43 @@
 import flet as ft
 from app.config import Container
 from app.view.style import settings
+from app.view.components.common import Image
 from app.view.components.ui.toast import ToastManager
+
 
 class App:
     def __init__(self, page: ft.Page, container: Container):
         self.page = page
         self.container = container
-        
-        self.toast = ToastManager(page, safe_area_top=40)
-        
+        self.toast: ToastManager | None = None
+        self._device_width = settings._main_width
+        self._device_height = settings._main_height
+
         self.page.padding = 0
         self.page.title = settings._app_name
-        self.page.window.width = settings._main_width
-        self.page.window.height = settings._main_height
         self.page.bgcolor = settings._main_colors["bg_dark"]
-        
+
         self.page.fonts = {
             name: str(path) for name, path in settings._main_fonts.items()
         }
 
+    def _settings(self) -> None:
+        self.page.window.resizable = False
+        self.page.window.frameless = False
+        self.page.window.maximizable = False
+        self.page.window.title_bar_hidden = False
+        self.page.window.width = self._device_width
+        self.page.window.height = self._device_height
+        self.page.window.min_width = self._device_width
+        self.page.window.max_width = self._device_width
+        self.page.window.min_height = self._device_height
+        self.page.window.max_height = self._device_height
+        self.page.window.aspect_ratio = self._device_width / self._device_height
+
     async def build(self):
-        bg_image = ft.Image(
-            src=str(settings._main_images["bg_fallback"]),
-            fit=ft.BoxFit.COVER,
-            width=self.page.width,
-            height=self.page.height,
-            opacity=0.3,
-        )
+        await self.page.window.wait_until_ready_to_show()
+        self._settings()
+        await self.page.window.center()
 
         content = ft.Column(
             controls=[
@@ -45,21 +55,38 @@ class App:
             expand=True,
         )
 
-        self.page.add(ft.Stack(
-            controls=[
-                ft.Container(
-                    content=bg_image,
-                    expand=True,
-                ),
-                ft.Container(
-                    content=content,
-                    alignment=ft.alignment.Alignment(0, 0),
-                    expand=True,
-                ),
-            ],
-            expand=True,
-            alignment=ft.alignment.Alignment(0, 0),
-        ))
+        self.toast = ToastManager(
+            page=self.page,
+            logger=self.container.logger(),
+            safe_area_top=40,
+        )
 
-        self.toast.info("GASI!")
+        self.page.add(
+            ft.Stack(
+                controls=[
+                    ft.Container(
+                        image=Image(
+                            path=settings._main_images["bg_fallback"],
+                            fit=ft.BoxFit.COVER,
+                            opacity=0.3,
+                        ),
+                        expand=True,
+                    ),
+                    ft.Container(
+                        content=content,
+                        alignment=ft.alignment.Alignment(0, 0),
+                        expand=True,
+                    ),
+                ],
+                expand=True,
+                fit=ft.StackFit.EXPAND,
+                alignment=ft.alignment.Alignment(0, 0),
+            )
+        )
+
+        self.toast.info("LICCAME LA CICIOLLA")
         self.page.update()
+
+    def close(self) -> None:
+        if self.toast is not None:
+            self.toast.close()
