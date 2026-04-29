@@ -160,6 +160,6 @@ class ToastManager:
 
         self._active = [t for t in self._active if t.id != toast_id]
         self._col.controls = [
-            c for c in self._col.controls
-            if getattr(c, "data", None) != toast_id
+            control for control in self._col.controls
+            if getattr(control, "data", None) != toast_id
         ]

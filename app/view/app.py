@@ -21,9 +21,9 @@ class App:
             name: str(path) for name, path in settings._main_fonts.items()
         }
 
-    def _settings(self) -> None:
+    def _apply(self) -> None:
+        self.page.window.frameless = True
         self.page.window.resizable = False
-        self.page.window.frameless = False
         self.page.window.maximizable = False
         self.page.window.title_bar_hidden = False
         self.page.window.width = self._device_width
@@ -36,7 +36,7 @@ class App:
 
     async def build(self):
         await self.page.window.wait_until_ready_to_show()
-        self._settings()
+        self._apply()
         await self.page.window.center()
 
         content = ft.Column(
