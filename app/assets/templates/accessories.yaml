@@ -1,4 +1,4 @@
-- key: ""
+- key: null
   name: "Anima del Pedone"
   weight: 0
   description: "Anima corrotta dall'Abisso, intrisa di potere. La povera creatura,
@@ -9,15 +9,16 @@
     moltiplicatore della tua velocità di corsa diventa x3."
   can_be_removed: 0
 
-- key: ""
+- key: null
   name: "Anima del Cavallo"
   weight: 0
-  description: "Anima corrotta dall'Abisso, intrisa di potere. Il suo nitrire e scalciare, in preda alle
-    ferite e al dolore, raggiunsero orecchie sorde. Fu l'Abisso stesso ad
-    accogliere le sue richieste d'aiuto e a donarle una nuova vita."
+  description: "Anima corrotta dall'Abisso, intrisa di potere. Il suo nitrire e
+    scalciare, in preda alle ferite e al dolore, raggiunsero orecchie sorde. Fu
+    l'Abisso stesso ad accogliere le sue richieste d'aiuto e a donarle una nuova
+    vita. Ottieni +5 in tutte le difese."
   can_be_removed: 0
 
-- key: ""
+- key: null
   name: "Anima dell'Alfiere"
   weight: 0
   description: "Anima corrotta dall'Abisso, intrisa di potere. Il capitano Rudimer
@@ -28,7 +29,7 @@
     meno dei PF)."
   can_be_removed: 0
 
-- key: ""
+- key: null
   name: "Anima della Torre"
   weight: 0
   description: "Anima corrotta dall'Abisso, intrisa di potere. La povera creatura
@@ -38,8 +39,14 @@
     puoi eseguire una qualsiasi azione come azione gratuita."
   can_be_removed: 0
 
-- key: ""
+- key: null
   name: "Anima della Regina"
   weight: 0
-  description: "Anima corrotta dall'Abisso, intrisa di potere."
+  description: "Anima corrotta dall'Abisso, intrisa di potere. Dopo anni di
+    prigionia e abusi, la giovane riuscì a fuggire dal proprio aguzzino.
+    Braccata dai segugi dei cacciatori, trovò rifugio in un antico fossato tra i
+    boschi. Lì venne accolta dai dimenticati, che la riconobbero come loro
+    regina. Conferisce a tutte le armi equipaggiate la proprietà Veleno. Le
+    probabilità di infliggere lo stato Avvelenato aumentano da25% a 50%. I danni
+    inflitti a creature Avvelenate aumentano di +1d6."
   can_be_removed: 0

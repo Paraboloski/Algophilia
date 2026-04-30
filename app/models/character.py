@@ -23,12 +23,12 @@ class EnhancedEffect(BaseModel):
 
 
 class GodAffinity(BaseModel):
-    god_key:        str
+    god_key:        int
     affinity_level: int = 0
 
 
 class InventorySlot(BaseModel):
-    key:      str
+    key:      int
     quantity: int = 1
 
 
@@ -113,13 +113,13 @@ class CharacterStats(BaseModel):
 
 
 class CharacterKnowledge(BaseModel):
-    key:           str
+    key:           int
     is_proficient: bool = False
     is_aptitude:   bool = False
 
 
 class CharacterSpell(BaseModel):
-    key:             str
+    key:             int
     name:            str
     enhanced_effect: EnhancedEffect
 
