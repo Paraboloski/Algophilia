@@ -12,25 +12,24 @@ class Worker:
         self._queue: Queue[Optional[Log]] = Queue()
         self._subscribers: list[Callable[[Log], None]] = []
 
-        self._thread = threading.Thread(
-            target=self._process_queue, daemon=True)
+        self._thread = threading.Thread(target=self.process_queue, daemon=True)
         self._thread.start()
 
-    def subscribe(self, callback: Callable[[Log], Any]):
+    def subscribe(self, f: Callable[[Log], Any]) -> None:
         with self._subscribers_lock:
-            self._subscribers.append(callback)
+            self._subscribers.append(f)
 
-    def unsubscribe(self, callback: Callable[[Log], Any]):
+    def unsubscribe(self, f: Callable[[Log], Any]) -> None:
         with self._subscribers_lock:
-            self._subscribers = [
-                sub for sub in self._subscribers if sub != callback]
-
-    def dispatch(self, log: Log):
+            if f in self._subscribers:
+                self._subscribers.remove(f)
+                
+    def dispatch(self, log: Log) -> None:
         if self._is_shutdown:
             return
         self._queue.put(log)
 
-    def _process_queue(self):
+    def process_queue(self) -> None:
         while True:
             log = self._queue.get()
 
@@ -46,7 +45,7 @@ class Worker:
 
             self._queue.task_done()
 
-    def shutdown(self):
+    def shutdown(self) -> None:
         with self._shutdown_lock:
             if self._is_shutdown:
                 return

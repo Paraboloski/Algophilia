@@ -1,35 +1,35 @@
+from dependency_injector import containers, providers
+
 from app.utils import Directory
 from app.config.settings import settings
 from app.data import Repository, Database
 from app.events import Telegram, Logger, Worker
-from dependency_injector import containers, providers
 
 
 class DependencyInjectorContainer(containers.DeclarativeContainer):
     worker = providers.Singleton(Worker)
-
     logger = providers.Singleton(
         Logger,
-        directory=Directory(settings._log_dir),
+        directory=Directory(settings.log_dir),
         worker=worker,
     )
 
     telegram = providers.Singleton(
         Telegram,
-        token=settings._telegram_token,
-        chat_id=settings._telegram_chat_id,
+        token=settings.telegram_token,
+        chat_id=settings.telegram_chat_id,
     )
 
     database = providers.Singleton(
         Database,
-        url=settings._database_url,
-        sql=settings._sql_schema,
-        yaml=settings._yaml_files,
         logger=logger,
+        schema_path=settings.schema_path,
+        url=settings.database_url,
+        seed_paths=settings.seed_files,
     )
 
     repository = providers.Singleton(
         Repository,
-        db=database,
+        database=database,
         logger=logger,
     )

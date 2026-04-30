@@ -21,7 +21,7 @@ class Session:
         logger = self.container.logger()
         logger.subscribe(self.container.telegram().send)
 
-        result = await self.container.database().start()
+        result = await self.container.database().connect()
         if result.is_err():
             error = result.unwrap_err()
             logger.error(f"Bootstrap: Errore inizializzazione DB | {error}")
@@ -33,7 +33,7 @@ class Session:
             self.container.logger().error(f"Shutdown: {result.unwrap_err()}")
 
         self.container.worker().shutdown()
-        self.container.logger()._directory._rmdir()
+        self.container.logger()._directory.rmdir()
 
     def cleanup(self) -> None:
         self.page.on_close = None

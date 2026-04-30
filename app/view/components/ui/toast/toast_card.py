@@ -48,41 +48,41 @@ def card_content(title: str | None, message: str) -> ft.Column:
 
 
 class ToastCard(ft.Container):
-
-    def __init__(
-        self,
-        toast: Toast,
-        page: ft.Page,
-        on_dismiss: Callable[[str], None],
-        dismiss_event: threading.Event,
-    ) -> None:
+    def __init__(self, toast: Toast, page: ft.Page, on_dismiss: Callable[[str], None], dismiss_event: threading.Event) -> None:
         super().__init__()
 
         self._page = page
+        
         self._toast = toast
+        
         self._on_dismiss = on_dismiss
+        
         self._dismiss_event = dismiss_event
+        
         self.data = toast.id
 
         self._theme = THEMES[toast.level]
 
         self._horizontal_drag = 0.0
-        self._card = self._build()
+        
+        self._card = self.card()
 
-        self.animate = ft.Animation(220, ft.AnimationCurve.EASE_OUT)
-        self.content = ft.GestureDetector(
-            on_horizontal_drag_update=self._on_drag_update,
-            on_horizontal_drag_end=self._on_drag_end,
+        self._animation = ft.Animation(220, ft.AnimationCurve.EASE_OUT)
+        self._gesture = ft.GestureDetector(
+            on_horizontal_drag_update=self.on_drag_update,
+            on_horizontal_drag_end=self.on_drag_end,
             drag_interval=1,
             content=self._card,
         )
 
-        self._start_animate()
+        self.content = self._gesture
+
+        self.start_animation()
 
         if self._theme.duration is not None:
-            self._start_progress_animation()
+            self.progress_bar_animation()
 
-    def _build(self) -> ft.Container:
+    def card(self) -> ft.Container:
         theme = self._theme
 
         self._progress_bar = ft.ProgressBar(
@@ -167,7 +167,7 @@ class ToastCard(ft.Container):
 
         return card
 
-    def _on_drag_update(self, event: ft.DragUpdateEvent) -> None:
+    def on_drag_update(self, event: ft.DragUpdateEvent) -> None:
         delta = getattr(event, "primary_delta", 0.0) or 0.0
 
         self._horizontal_drag += delta
@@ -175,13 +175,13 @@ class ToastCard(ft.Container):
         self._card.offset = ft.Offset(self._horizontal_drag / 100, 0)
         self._card.update()
 
-    def _on_drag_end(self, event: ft.DragEndEvent) -> None:
+    def on_drag_end(self, event: ft.DragEndEvent) -> None:
         velocity = getattr(event, "primary_velocity", 0.0) or 0.0
         _distance = self._horizontal_drag
 
         self._horizontal_drag = 0.0
 
-        is_close = self._dismiss_on_swipe(velocity, _distance)
+        is_close = self.swipe(velocity, _distance)
 
         if is_close:
             if _distance < 0 or velocity < 0:
@@ -199,26 +199,26 @@ class ToastCard(ft.Container):
             self._card.offset = ft.Offset(0, 0)
             self._card.update()
 
-    def _dismiss_on_swipe(self, velocity: float, distance: float) -> bool:
+    def swipe(self, velocity: float, distance: float) -> bool:
         velocity_is_high = abs(velocity) > SWIPE_SPEED
         distance_is_far = abs(distance) > SWIPE_DISTANCE
 
         return velocity_is_high or distance_is_far
 
-    def _start_animate(self) -> None:
-        self._page.run_task(self._run_toast_animation)
+    def start_animation(self) -> None:
+        self._page.run_task(self.run_toast_animation)
 
-    def _start_progress_animation(self) -> None:
-        self._page.run_task(self._run_bar_animation)
+    def progress_bar_animation(self) -> None:
+        self._page.run_task(self.run_bar_animation)
 
-    async def _run_toast_animation(self) -> None:
+    async def run_toast_animation(self) -> None:
         await asyncio.sleep(START_ANIMATION)
 
         if not self._dismiss_event.is_set():
             self._card.offset = ft.Offset(0, 0)
             self._page.update()
 
-    async def _run_bar_animation(self) -> None:
+    async def run_bar_animation(self) -> None:
         if self._theme.duration is None:
             return
 

@@ -1,51 +1,61 @@
-from aiosqlite import Error
+from aiosqlite import Error, Connection
 from result import Ok, Err, Result
-from app.events.logger import Logger
+
 from app.data.database import Database
+from app.events.logger import Logger
 from app.utils.exception import AppError, QueryError
 
 
 class Repository:
-    def __init__(self, db: Database, logger: Logger) -> None:
-        self._database = db
+    def __init__(self, database: Database, logger: Logger) -> None:
         self._logger = logger
+        self._database = database
+
+    def get_connection(self) -> Result[Connection, AppError]:
+        return self._database.get_connection()
 
     async def execute(self, query: str, params: tuple = ()) -> Result[bool, AppError]:
-        response = self._database.get_connection()
-        if response.is_err():
-            return Err(response.unwrap_err())
+        conn_result = self.get_connection()
+        if conn_result.is_err():
+            return Err(conn_result.unwrap_err())
 
-        conn = response.unwrap()
+        conn = conn_result.unwrap()
 
         try:
             self._logger.debug(f"SQL: {query} | Params: {params}")
+
             await conn.execute(query, params)
             await conn.commit()
+
             return Ok(True)
 
         except Error as e:
+            await conn.rollback()
+
             exception = QueryError(query=query, details=str(e))
             self._logger.error(str(exception))
+
             return Err(exception)
 
     async def execute_all(self, queries: list[tuple[str, tuple]]) -> Result[bool, AppError]:
-        response = self._database.get_connection()
-        if response.is_err():
-            return Err(response.unwrap_err())
+        conn_result = self.get_connection()
+        if conn_result.is_err():
+            return Err(conn_result.unwrap_err())
 
-        conn = response.unwrap()
+        conn = conn_result.unwrap()
 
         try:
-            async with conn.cursor() as cursor:
-                for query, params in queries:
-                    self._logger.debug(f"SQL: {query} | Params: {params}")
-                    await cursor.execute(query, params)
+            for query, params in queries:
+                self._logger.debug(f"SQL: {query} | Params: {params}")
+                await conn.execute(query, params)
 
             await conn.commit()
             return Ok(True)
 
         except Error as e:
             await conn.rollback()
-            exception = QueryError(query="Batch", details=str(e))
+
+            exception = QueryError(query="BATCH_EXECUTE", details=str(e))
             self._logger.error(str(exception))
+
             return Err(exception)

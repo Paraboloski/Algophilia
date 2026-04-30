@@ -10,17 +10,17 @@ class Logger:
     def __init__(self, directory: Directory, worker: Worker):
         self._worker = worker
         self._directory = directory
-        self._worker.subscribe(self._write)
+        self._worker.subscribe(self.write)
 
-    def _write(self, log: Log):
+    def write(self, log: Log)  -> None:
         self._directory.write(f"{log.level.value}.log", str(log))
 
-    def _origin(self) -> tuple[str, int]:
+    def get_origin(self) -> tuple[str, int]:
         info = inspect.stack()[3]
         return os.path.basename(info.filename), info.lineno
 
-    def _log(self, level: LogLevel, message: str, error: Optional[Any] = None):
-        origin, line = self._origin()
+    def log(self, level: LogLevel, message: str, error: Optional[Any] = None)  -> None:
+        origin, line = self.get_origin()
 
         log = Log(
             level=level,
@@ -32,20 +32,20 @@ class Logger:
 
         self._worker.dispatch(log)
 
-    def info(self, message: str):
-        self._log(LogLevel.INFO, message)
+    def info(self, message: str) -> None: 
+        self.log(LogLevel.INFO, message)
 
-    def debug(self, message: str):
-        self._log(LogLevel.DEBUG, message)
+    def debug(self, message: str) -> None:
+        self.log(LogLevel.DEBUG, message)
 
-    def warn(self, message: str):
-        self._log(LogLevel.WARNING, message)
+    def warn(self, message: str) -> None:
+        self.log(LogLevel.WARNING, message)
 
-    def error(self, message: str, err: Optional[Any] = None):
-        self._log(LogLevel.ERROR, message, err)
+    def error(self, message: str, err: Optional[Any] = None) -> None:
+        self.log(LogLevel.ERROR, message, err)
 
-    def subscribe(self, f: Callable[[Log], Any]):
+    def subscribe(self, f: Callable[[Log], Any]) -> None:
         self._worker.subscribe(f)
 
-    def unsubscribe(self, f: Callable[[Log], Any]):
+    def unsubscribe(self, f: Callable[[Log], Any]) -> None:
         self._worker.unsubscribe(f)

@@ -21,7 +21,7 @@ class App:
             name: str(path) for name, path in settings._main_fonts.items()
         }
 
-    def _apply(self) -> None:
+    def ready(self) -> None:
         self.page.window.frameless = True
         self.page.window.resizable = False
         self.page.window.maximizable = False
@@ -36,7 +36,7 @@ class App:
 
     async def build(self):
         await self.page.window.wait_until_ready_to_show()
-        self._apply()
+        self.ready()
         await self.page.window.center()
 
         content = ft.Column(
@@ -84,7 +84,9 @@ class App:
             )
         )
 
-        self.toast.info("LICCAME LA CICIOLLA")
+        self.toast.info("TEST 1")
+        self.toast.warning("TEST 2")
+        self.toast.error("TEST 3")
         self.page.update()
 
     def close(self) -> None:

@@ -1,7 +1,8 @@
 from pathlib import Path
 from app.utils import Env
 
-_YAML_FILES = [
+
+SEED = [
     Path("app/assets/templates/feats.yaml"),
     Path("app/assets/templates/items.yaml"),
     Path("app/assets/templates/souls.yaml"),
@@ -17,14 +18,14 @@ _YAML_FILES = [
 
 
 class Settings:
-    def __init__(self):
-        _env = Env()
-        self._yaml_files = _YAML_FILES
-        self._log_dir = "app/assets/logs"
-        self._database_url = _env.require("DATABASE_URL")
-        self._sql_schema = "app/assets/templates/schema.sql"
-        self._telegram_token = _env.get_env("TELEGRAM_TOKEN")
-        self._telegram_chat_id = _env.get_env("TELEGRAM_CHAT_ID")
+    def __init__(self) -> None:
+        env = Env()
+        self.seed_files: list[Path] = SEED
+        self.log_dir: str = "app/assets/logs"
+        self.database_url: str = env.require("DATABASE_URL")
+        self.telegram_token = env.get_env("TELEGRAM_TOKEN") 
+        self.telegram_chat_id = env.get_env("TELEGRAM_CHAT_ID")
+        self.schema_path: str = "app/assets/templates/schema.sql"
 
 
 settings = Settings()

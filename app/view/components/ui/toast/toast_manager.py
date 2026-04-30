@@ -20,14 +20,9 @@ MAP_LOG_LEVEL_TO_TOAST_LEVEL: dict[LogLevel, Level] = {
 
 
 class ToastManager:
-    def __init__(
-        self,
-        page: ft.Page,
-        logger: Logger,
-        safe_area_top: int,
-        overlay_host: ft.Stack | None = None,
-    ) -> None:
+    def __init__(self, page: ft.Page, logger: Logger, safe_area_top: int, overlay_host: ft.Stack | None = None) -> None:
         self._page = page
+        
         self._logger = logger
 
         self._is_closed = False
@@ -58,7 +53,7 @@ class ToastManager:
         else:
             overlay_host.controls.append(self._overlay_layer)
 
-        self._logger.subscribe(self._on_new_log)
+        self._logger.subscribe(self.on_new_log)
 
     def info(self, message: str, title: str | None = None) -> None:
         self.show(message, Level.INFO, title)
@@ -79,7 +74,7 @@ class ToastManager:
             if len(self._active_toasts) >= MAX:
                 self._queued_toasts.append(new_toast)
                 return
-        self._build_toast(new_toast)
+        self.toast(new_toast)
 
     def close(self) -> None:
         with self._lock:
@@ -88,7 +83,7 @@ class ToastManager:
 
             self._is_closed = True
 
-            self._logger.unsubscribe(self._on_new_log)
+            self._logger.unsubscribe(self.on_new_log)
 
             for dismiss_event in self._dismiss_events.values():
                 dismiss_event.set()
@@ -98,11 +93,11 @@ class ToastManager:
             self._queued_toasts.clear()
             self._toast_column.controls.clear()
 
-    def _on_new_log(self, log: Log) -> None:
+    def on_new_log(self, log: Log) -> None:
         if not self._is_closed:
-            self._page.run_task(self._show_from_log, log)
+            self._page.run_task(self.show_from_log, log)
 
-    async def _show_from_log(self, log: Log) -> None:
+    async def show_from_log(self, log: Log) -> None:
         toast_level = MAP_LOG_LEVEL_TO_TOAST_LEVEL.get(log.level)
         if toast_level is None:
             return
@@ -114,7 +109,7 @@ class ToastManager:
 
         self.show(message=message, level=toast_level, title=log.origin)
 
-    def _build_toast(self, toast: Toast) -> None:
+    def toast(self, toast: Toast) -> None:
         theme = THEMES[toast.level]
 
         dismiss_event = threading.Event()
@@ -128,7 +123,7 @@ class ToastManager:
         toast_card = ToastCard(
             toast=toast,
             page=self._page,
-            on_dismiss=self._dismiss_toast,
+            on_dismiss=self.dismiss,
             dismiss_event=dismiss_event,
         )
         self._toast_column.controls.append(toast_card)
@@ -136,13 +131,13 @@ class ToastManager:
 
         if theme.duration is not None:
             self._page.run_task(
-                self._wait_and_dismiss,
+                self.wait,
                 toast.id,
                 float(theme.duration),
                 dismiss_event,
             )
 
-    async def _wait_and_dismiss(
+    async def wait(
         self,
         toast_id: str,
         duration: float,
@@ -152,33 +147,33 @@ class ToastManager:
         await asyncio.sleep(duration)
 
         if not dismiss_event.is_set():
-            self._dismiss_toast(toast_id)
+            self.dismiss(toast_id)
 
-    def _dismiss_toast(self, toast_id: str) -> None:
+    def dismiss(self, toast_id: str) -> None:
         next_toast: Toast | None = None
 
         with self._lock:
             if self._is_closed:
                 return
-            if not self._is_toast_active(toast_id):
+            if not self.is_active(toast_id):
                 return
 
-            self._remove_toast(toast_id)
+            self.remove(toast_id)
             if self._queued_toasts:
                 next_toast = self._queued_toasts.pop(0)
 
         self._page.update()
 
         if next_toast is not None:
-            self._build_toast(next_toast)
+            self.toast(next_toast)
 
-    def _is_toast_active(self, toast_id: str) -> bool:
+    def is_active(self, toast_id: str) -> bool:
         for toast in self._active_toasts:
             if toast.id == toast_id:
                 return True
         return False
 
-    def _remove_toast(self, toast_id: str) -> None:
+    def remove(self, toast_id: str) -> None:
         dismiss_event = self._dismiss_events.pop(toast_id, None)
         if dismiss_event is not None:
             dismiss_event.set()
