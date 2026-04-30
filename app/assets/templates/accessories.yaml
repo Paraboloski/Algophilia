@@ -50,3 +50,14 @@
     probabilità di infliggere lo stato Avvelenato aumentano da25% a 50%. I danni
     inflitti a creature Avvelenate aumentano di +1d6."
   can_be_removed: 0
+
+- key: null
+  name: "Anima Artificiale"
+  weight: 2
+  description: "Secondo voci di corridoio, i Nuovi Dei starebbero conducendo
+    loschi esperimenti, fabbricando costrutti nel tentativo di creare una forma
+    di vita artificiale. Uno di questi esperimenti sarebbe riuscito a fuggire,
+    iniziando a nutrirsi delle anime altrui. Col tempo deve aver sviluppato
+    un'ossessione per i volti terrorizzati delle sue vittime. Riduce il costo
+    degli incantesimi di 2."
+  can_be_removed: 1
