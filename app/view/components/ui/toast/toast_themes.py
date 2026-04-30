@@ -22,7 +22,7 @@ class Theme:
     duration: Optional[int]
 
 
-CLASSES: dict[Level, Theme] = {
+THEMES: dict[Level, Theme] = {
     Level.INFO: Theme(
         border_color=settings._main_colors["info_light"],
         bg_light=settings._main_colors["bg_light"],

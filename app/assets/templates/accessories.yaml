@@ -1,274 +1,45 @@
-- key: "Bambola peculiare"
-  name: "Bambola peculiare"
-  weight: 1
-  description: "Balocco di pezza cucito grezzamente. All'apparenza insignificante,
-    ma leggermente inquietante."
-  can_be_removed: 1
-
-- key: "Talismano del Sole"
-  name: "Talismano del Sole"
-  weight: 1
-  description: "Un antico talismano orientale inciso con un sole nero. Durante
-    ogni Scena di Riposo, recuperi una quantità di Punti Ferita pari alla metà
-    del tuo valore di Grinta."
-  can_be_removed: 1
-
-- key: "Talismano della Luna"
-  name: "Talismano della Luna"
-  weight: 1
-  description: "Un antico talismano orientale inciso con una luna bianca. Durante
-    ogni Scena di Riposo, recuperi una quantità di Punti Mente pari alla metà
-    del tuo valore di Tenacia."
-  can_be_removed: 1
-
-- key: "Talismano dell' Eclissi"
-  name: "Talismano dell' Eclissi"
-  weight: 2
-  description: "Raro talismano orientale raffigurante un'eclissi di sole. Hai
-    vantaggio nelle prove per terminare l'effetto delle condizioni."
-  can_be_removed: 1
-
-- key: "Amuleto di Yggaegetsu"
-  name: "Amuleto di Yggaegetsu"
-  weight: 2
-  description: "Un ciondolo consacrato al dio della guerra Yggaegetsu. Donato ai
-    guerrieri erranti, alimenta lo spirito combattivo. Ogni volta che manchi un
-    attacco o fallisci una prova di Conoscenza, il prossimo attacco o prova di
-    Conoscenza avrà un modificatore di +1 (fino a un massimo di +4)."
-  can_be_removed: 1
-
-- key: "Zampa di lupo delle caverne"
-  name: "Zampa di lupo delle caverne"
-  weight: 2
-  description: "Una zampa di lupo delle caverne appena recisa. Rozzo portafortuna
-    dei cacciatori. Una volta per Ciclo diurno, puoi decidere di considerare un
-    tiro fallito come un successo."
-  can_be_removed: 1
-
-- key: "Zaino"
-  name: "Zaino"
+- key: ""
+  name: "Anima del Pedone"
   weight: 0
-  description: "Aumenta gli slot inventario di +5. Estrarre un oggetto richiede
-    un'azione semplice."
-  can_be_removed: 1
-
-- key: "Lanterna Ornamentale"
-  name: "Lanterna Ornamentale"
-  weight: 1
-  description: "Lanterna rituale dei Preti Oscuri. Illumina un raggio di 5m
-    centrato su di te. Se lanciata (Grinta x2) e colpisce, infligge 1d6 danni da
-    fuoco e può causare Ustione."
-  can_be_removed: 1
-
-- key: "Torcia"
-  name: "Torcia"
-  weight: 1
-  description: "Illumina un raggio di 4m centrato su di te."
-  can_be_removed: 1
-
-- key: "Fischietto"
-  name: "Fischietto"
-  weight: 0
-  description: "Produce un suono forte e penetrante, udibile a grande distanza.
-    Utile per allertare gli alleati."
-  can_be_removed: 1
-
-- key: "Occhiali"
-  name: "Occhiali"
-  weight: 0
-  description: "Lenti correttive semplici ma efficaci. Permettono di vedere
-    chiaramente anche i dettagli più fini. Ottieni vantaggio nelle prove di
-    Percezione."
-  can_be_removed: 1
-
-- key: "Profumo orientale"
-  name: "Profumo orientale"
-  weight: 1
-  description: "Una boccetta di profumo e incenso orientale. L'aroma attira mostri
-    e bestie nelle vicinanze."
-  can_be_removed: 1
-
-- key: "Chac Chac"
-  name: "Chac Chac"
-  weight: 3
-  description: "Strumento a percussione dal ritmo ipnotico. Una volta per scena
-    puoi effettuare una prova di Arte come azione semplice: gli alleati
-    ottengono Punti Mente pari al risultato."
-  can_be_removed: 1
-
-- key: "Collana con un'ala sola"
-  name: "Collana con un'ala sola"
-  weight: 1
-  description: "Una collana spezzata a metà. Inutile senza la sua controparte."
-  can_be_removed: 1
-
-- key: "Collana di farfalla blu"
-  name: "Collana di farfalla blu"
-  weight: 2
-  description: "Una collana completa a forma di farfalla blu. Protegge dalle forze
-    ultraterrene. Ha 4 cariche: puoi consumarne 1 come azione gratuita per
-    ridurre danni magici o ultraterreni pari a Tenacia x2. A 0 cariche si
-    spezza. Durante una scena di riposo recupera 1d4 cariche."
-  can_be_removed: 1
-
-- key: "Cameo Guardiano"
-  name: "Cameo Guardiano"
-  weight: 1
-  description: "Stemma raffigurante una bellissima donna di un'epoca passata. Si
-    dice vegli sui più deboli. Quando sei a metà Punti Ferita o meno, aumenta
-    tutte le difese di +5."
-  can_be_removed: 1
-
-- key: "Anello di Tormenti"
-  name: "Anello di Tormenti"
-  weight: 1
-  description: "Un anello con un diamante rosso intriso di morte. Ogni volta che i
-    tuoi Punti Ferita sono pari alla metà o meno, recuperi 1d4 Punti Ferita per
-    ogni attacco che va a segno. Questo effetto termina quando recuperi più
-    della metà dei tuoi Punti Ferita."
-  can_be_removed: 1
-
-- key: "Anello di Betel"
-  name: "Anello di Betel"
-  weight: 1
-  description: "Anello appartenuto al dio illuminato Betel. Raddoppia l'intensità
-    della luce emessa da oggetti e incantesimi. Ogni volta che i tuoi Punti
-    Mente sono pari alla metà o meno, recuperi 1d4 Punti Mente per ogni
-    incantesimo lanciato. Questo effetto termina quando recuperi più della metà
-    dei tuoi Punti Mente."
-  can_be_removed: 1
-
-- key: "Collana divora anime"
-  name: "Collana divora anime"
-  weight: 1
-  description: "Una collana con una pietra dell'anima incastonata. Ogni volta che
-    sei sotto l'effetto di Paura, ottieni +1 a tutte le tue prove e riduci della
-    metà le penalità causate dalla tua fobia."
-  can_be_removed: 1
-
-- key: "Anello del sangue vivo"
-  name: "Anello del sangue vivo"
-  weight: 1
-  description: "Un anello che, secondo la tradizione, sigilla il sangue e
-    impedisce ogni emorragia. Si dice si fonda lentamente con il dito di chi lo
-    indossa. Non esiste spiegazione medica, sembra trattarsi di magia pura.
-    Conferisce immunità alla condizione Sanguinamento."
+  description: "Anima corrotta dall'Abisso, intrisa di potere. La povera creatura,
+    come tutti i reietti delle profondità, era nata e cresciuta nell'oscurità
+    donata dal Dio degli Abissi. Tuttavia, ella rifiutò tale dono, desiderando
+    ardentemente di spiccare il volo avvolta dalla luce del sole. Inutile dire
+    che ogni suo sforzo fu vano. La tua velocità di camminata è raddoppiata e il
+    moltiplicatore della tua velocità di corsa diventa x3."
   can_be_removed: 0
 
-- key: "Piccolo Ninnolo"
-  name: "Piccolo Ninnolo"
-  weight: 2
-  description: "Un amuleto rozzo raffigurante una divinità-topo, venerata dai
-    piccoli e dimenticati. Conferisce +3 a tutti gli attributi."
-  can_be_removed: 1
-
-- key: "Anello spinoso"
-  name: "Anello spinoso"
-  weight: 1
-  description: "Un anello ricoperto di spine che rilasciano un flusso continuo di
-    veleno. Conferisce immunità ad Avvelenamento e Intossicazione. Subisci
-    costantemente 1 PF a causa delle spine."
-  can_be_removed: 0
-
-- key: "Cuore Indurito"
-  name: "Cuore Indurito"
-  weight: 4
-  description: "Un cuore cristallizzato e indurito, nato da dolore e sofferenza
-    accumulati. Al vecchio guardiano venne affidato il compito di vegliare
-    sull'antica città e, anche quando tutti lo abbandonarono, rimase vigile come
-    ultimo baluardo del trono del Re. Una volta per Ciclo Diurno puoi annullare
-    un danno che ti porterebbe a 0 PF o meno, rimanendo a 1 PF. Dopo l'utilizzo,
-    il cuore si frantuma."
-  can_be_removed: 1
-
-- key: "Anima Artificiale"
-  name: "Anima Artificiale"
-  weight: 2
-  description: "Circolano voci secondo cui i Nuovi Dei abbiano sperimentato la
-    creazione di anime artificiali per alimentare rituali ed esperimenti. Uno di
-    questi esperimenti riuscì a fuggire, iniziando a raccogliere le anime degli
-    sventurati che incontrava. Con il tempo sviluppò un'ossessione per i loro
-    volti terrorizzati. Riduce di 2 il costo degli incantesimi."
-  can_be_removed: 0
-
-- key: "Occhio di Marduk"
-  name: "Occhio di Marduk"
-  weight: 2
-  description: "Si dice sia l'occhio della dea Marduk. Aggiunge 1 dado a tutti gli
-    effetti di cura provenienti da oggetti o incantesimi."
-  can_be_removed: 1
-
-- key: "Anello sanguisuga"
-  name: "Anello sanguisuga"
-  weight: 1
-  description: "Un anello forgiato dai Maghi Eremiti del Sud, devoti al Dio degli
-    Abissi. L'anello ha 4 cariche: con un'Azione Estrema puoi consumarne una per
-    convertire metà di un danno inflitto in PF. A 0 cariche entri in stato di
-    Martirio. Uscendo dal Martirio, le cariche vengono ripristinate."
-  can_be_removed: 0
-
-- key: "Runa dei draghi"
-  name: "Runa dei draghi"
-  weight: 2
-  description: "Un'antica reliquia che si dice contenga l'anima di una bestia
-    preistorica. Conferisce immunità alle condizioni Amputazione, Frattura e
-    Infezione."
-  can_be_removed: 1
-
-- key: "Maschera gioiosa"
-  name: "Maschera gioiosa"
-  weight: 2
-  description: "Una maschera di cuoio che imita un volto umano con risultati
-    imperfetti. Conferisce immunità alla condizione Cecità e +1 Sotterfugio
-    nelle scene di furtività e +3 nelle prove di Parlare."
-  can_be_removed: 1
-
-- key: "Anima del Corvo Assassino"
-  name: "Anima del Corvo Assassino"
+- key: ""
+  name: "Anima del Cavallo"
   weight: 0
-  description: "Anima corrotta di un Apostolo dell'Abisso, intrisa di potere. Il
-    capitano delle guardie di Rondon era così ossessionato dal proprio stemma che
-    finì per prenderne le sembianze quando divenne l'Alfiere dell'oscurità. 
-    Permette di impugnare armi a due mani con una sola mano, mantenendone danno ed effetti."
+  description: "Anima corrotta dall'Abisso, intrisa di potere. Il suo nitrire e scalciare, in preda alle
+    ferite e al dolore, raggiunsero orecchie sorde. Fu l'Abisso stesso ad
+    accogliere le sue richieste d'aiuto e a donarle una nuova vita."
   can_be_removed: 0
 
-- key: "Anima della Madre Insetto"
-  name: "Anima della Madre Insetto"
+- key: ""
+  name: "Anima dell'Alfiere"
   weight: 0
-  description: "Anima corrotta di un Apostolo dell'Abisso, intrisa di potere. Una
-    fanciulla venne accusata ingiustamente di furto e ridotta in schiavitù da un
-    Nobile. Dopo anni di abusi e torture, il suo corpo venne gettato in un fosso
-    nei boschi. Lì venne accolta dalle creature abissali, che la riconobbero
-    come loro Regina. Conferisce a tutte le armi equipaggiate la proprietà
-    Probabilità di Avvelenamento."
+  description: "Anima corrotta dall'Abisso, intrisa di potere. Il capitano Rudimer
+    era determinato a purificare il dungeon dalla corruzione. Non immaginava
+    minimamente che sarebbe diventato egli stesso parte delle tenebre. Puoi
+    impugnare armi a due mani con una sola mano senza penalità. Le armi a due
+    mani infliggono +1d4 danni (+1d6 se hai 50% o meno dei PF, +1d8 se hai 25% o
+    meno dei PF)."
   can_be_removed: 0
 
-- key: "Anima della Falena Pallida"
-  name: "Anima della Falena Pallida"
+- key: ""
+  name: "Anima della Torre"
   weight: 0
-  description: "Anima corrotta di una creatura fragile, un mero Pedone degli
-    Abissi. La Falena nacque come creatura fragile, confinata all'oscurità.
-    Eppure, non smise mai di inseguire la luce. Ottieni +5 Resilienza e
-    vantaggio nelle prove di Evasione."
+  description: "Anima corrotta dall'Abisso, intrisa di potere. La povera creatura
+    attese per tutta la vita il giorno in cui avrebbe realizzato il tanto
+    agognato sogno. Spezzata e tormentata dal desiderio, finì per esserne
+    consumata. Sei sempre il primo nel turno di iniziativa. Una volta per turno
+    puoi eseguire una qualsiasi azione come azione gratuita."
   can_be_removed: 0
 
-- key: "Anima dell'Angelo Pallido"
-  name: "Anima dell'Angelo Pallido"
+- key: ""
+  name: "Anima della Regina"
   weight: 0
-  description: "Anima corrotta di un Apostolo dell'Abisso, divenuta una Torre che
-    ascende verso il cielo. La Falena finalmente riuscì a raggiungere il sole,
-    ma finì per rimanere consumata della stessa luminosità che tanto agognava.
-    Ogni turno puoi trattare una qualsiasi azione come azione gratuita."
-  can_be_removed: 0
-
-- key: "Anima del Cavaliere informe"
-  name: "Anima del Cavaliere informe"
-  weight: 0
-  description: "Anima corrotta di un Apostolo dell'Abisso, intrisa di potere. Una
-    bestia lasciata a morire rifiutò la propria fine e venne accolta
-    dall'Abisso, divenendone il Destriero. In preda alla follia, la bestia
-    inizio a consumare l'oscurità fino a fondersi con essa. Una volta per Ciclo
-    Diurno, usando un'Azione Estrema, recuperi PF pari al doppio del tuo valore
-    di Grinta e ottieni +5 a tutti i tiri di Grinta e Intensità. Al termine
-    della scena, rimani a 1 PM."
+  description: "Anima corrotta dall'Abisso, intrisa di potere."
   can_be_removed: 0

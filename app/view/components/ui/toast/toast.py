@@ -3,7 +3,7 @@ from __future__ import annotations
 import uuid
 from typing import Optional
 from dataclasses import dataclass
-from app.view.components.ui.toast.toast_classes import Level
+from app.view.components.ui.toast.toast_themes import Level
 
 
 @dataclass
@@ -14,7 +14,7 @@ class Toast:
     title:   Optional[str]
 
     @staticmethod
-    def make(message: str, level: Level, title: Optional[str] = None) -> "Toast":
+    def _(message: str, level: Level, title: Optional[str] = None) -> "Toast":
         return Toast(
             id=str(uuid.uuid4()),
             message=message,
